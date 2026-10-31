@@ -61,7 +61,7 @@ export default defineConfig(({ command }) => {
       pwaSeoPlugin({
         basePath,
         logoPath: '/icons/icon-512.png',
-        themeColor: { light: '#f7f8fa', dark: '#0f1115' },
+        themeColor: { light: '#e8f2f5', dark: '#061018' },
       }),
 
       // `frame-ancestors` est volontairement absent : la spécification

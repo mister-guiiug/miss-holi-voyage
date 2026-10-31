@@ -49,7 +49,7 @@ createRoot(container).render(
           catalogue des palettes de la famille. */}
       <ThemeProvider
         paint={false}
-        themeColor={{ light: '#f7f8fa', dark: '#0f1115' }}
+        themeColor={{ light: '#e8f2f5', dark: '#061018' }}
       >
         <I18nProvider>
           {/* L'adaptateur est `null` tant qu'aucun backend distant n'est
