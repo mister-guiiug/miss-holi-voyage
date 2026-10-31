@@ -5,7 +5,7 @@ import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
 import { LoginForm } from '@mister-guiiug/dev-pwa-config/react/login-form';
 import { useAuthContext } from '@mister-guiiug/dev-pwa-config/react/auth-provider';
 import { useI18n } from '../../i18n/index.ts';
-import { useRole } from '../../auth/index.ts';
+import { adresseDeRetour, useRole } from '../../auth/index.ts';
 import { coverage } from '../../backend/index.ts';
 import { DangerZone } from './DangerZone.tsx';
 
@@ -138,7 +138,7 @@ export function AccountScreen() {
                 // du projet, qui ne contient que localhost:3000 à la création.
                 signInWithOtp({
                   email: values.email,
-                  emailRedirectTo: `${window.location.origin}${import.meta.env.BASE_URL}`,
+                  emailRedirectTo: adresseDeRetour(),
                 }).then(result => {
                   if (result.ok) setSentTo(values.email);
                   else setError(result.error?.message ?? null);
