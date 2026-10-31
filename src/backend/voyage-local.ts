@@ -17,6 +17,10 @@ import {
   suggestSpecQuestions,
 } from '../entities/ai-tools.ts';
 import type { VoyageRepository } from './voyage-ports.ts';
+import {
+  createInviteCode,
+  normalizeInviteCode,
+} from '../entities/invite-code.ts';
 
 const LOCAL_USER = 'local-user';
 
@@ -106,6 +110,7 @@ export function createLocalVoyage(): VoyageRepository {
 
     async createInvite(householdId) {
       const token = createId('inv').replace(/^inv_/, '');
+      const code = createInviteCode();
       const snap = voyageStore.load();
       const expiresAt = new Date(
         Date.now() + 14 * 24 * 60 * 60 * 1000
@@ -113,16 +118,21 @@ export function createLocalVoyage(): VoyageRepository {
       voyageStore.save({
         ...snap,
         inviteTokens: [
-          { householdId, token, role: 'editor', expiresAt },
+          { householdId, token, code, role: 'editor', expiresAt },
           ...snap.inviteTokens,
         ],
       });
-      return { token, expiresAt };
+      return { token, code, expiresAt };
     },
 
-    async acceptInvite(token) {
+    async acceptInvite(tokenOrCode) {
       const snap = voyageStore.load();
-      const inv = snap.inviteTokens.find(i => i.token === token);
+      const normalized = normalizeInviteCode(tokenOrCode);
+      const inv = snap.inviteTokens.find(
+        i =>
+          i.token === tokenOrCode.trim() ||
+          (i.code && normalizeInviteCode(i.code) === normalized)
+      );
       if (!inv) throw new Error('invitation inconnue');
       if (
         !snap.memberships.some(

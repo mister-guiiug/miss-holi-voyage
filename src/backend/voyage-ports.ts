@@ -23,10 +23,13 @@ export type { VoyageSnapshot, StyleProposal };
 export interface VoyageRepository {
   load(): Promise<VoyageSnapshot>;
   createHousehold(name: string, notes?: string): Promise<Household>;
-  createInvite(
-    householdId: string
-  ): Promise<{ token: string; expiresAt: string }>;
-  acceptInvite(token: string): Promise<string>;
+  createInvite(householdId: string): Promise<{
+    token: string;
+    code: string;
+    expiresAt: string;
+  }>;
+  /** Accepte un jeton opaque ou un code court XXXX-XXXX. */
+  acceptInvite(tokenOrCode: string): Promise<string>;
   addMember(
     member: Omit<HouseholdMember, 'id'> & { id?: string }
   ): Promise<HouseholdMember>;

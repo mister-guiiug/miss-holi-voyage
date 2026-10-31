@@ -187,7 +187,10 @@ export const voyageSnapshotSchema = z.object({
   inviteTokens: z.array(
     z.object({
       householdId: z.string(),
+      /** Jeton opaque (acceptation API / magasin). */
       token: z.string(),
+      /** Code court affiché / QR (XXXX-XXXX). */
+      code: z.string().min(8).max(12).optional(),
       role: householdRoleSchema,
       expiresAt: z.string(),
     })

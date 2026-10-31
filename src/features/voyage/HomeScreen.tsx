@@ -12,7 +12,9 @@ import {
   excursionTicketClass,
   flightTicketClass,
 } from '../../entities/ticket-age.ts';
+import { normalizeInviteCode } from '../../entities/invite-code.ts';
 import { useVoyage } from './store.ts';
+import { InviteShare } from './InviteShare.tsx';
 import { MeridianField } from './MeridianField.tsx';
 
 /**
@@ -40,7 +42,11 @@ export function HomeScreen() {
   const [editBirth, setEditBirth] = useState('');
   const [tripTitle, setTripTitle] = useState('');
   const [inviteToken, setInviteToken] = useState('');
-  const [lastInvite, setLastInvite] = useState('');
+  const [lastInvite, setLastInvite] = useState<{
+    code: string;
+    expiresAt: string;
+  } | null>(null);
+  const [joinError, setJoinError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -103,20 +109,34 @@ export function HomeScreen() {
                 e.preventDefault();
                 if (!inviteToken.trim()) return;
                 setBusy(true);
-                void acceptInvite(inviteToken.trim()).finally(() =>
-                  setBusy(false)
-                );
+                setJoinError(null);
+                void acceptInvite(normalizeInviteCode(inviteToken))
+                  .catch(() => setJoinError(t('voyage.inviteInvalid')))
+                  .finally(() => setBusy(false));
                 setInviteToken('');
               }}
             >
               <TextField
-                label={t('voyage.inviteToken')}
+                label={t('voyage.inviteCodeLabel')}
                 value={inviteToken}
                 onChange={e => setInviteToken(e.target.value)}
+                autoComplete="off"
+                spellCheck={false}
               />
+              {joinError ? (
+                <p role="alert" className="text-danger m-0 text-sm">
+                  {joinError}
+                </p>
+              ) : null}
               <Button type="submit" variant="secondary" disabled={busy}>
                 {t('voyage.acceptInvite')}
               </Button>
+              <Link
+                to="/rejoindre"
+                className="text-sm underline-offset-2 hover:underline"
+              >
+                {t('voyage.joinTitle')}
+              </Link>
             </form>
           </EmptyState>
         </div>
@@ -218,17 +238,28 @@ export function HomeScreen() {
                 <Button
                   type="button"
                   variant="secondary"
+                  disabled={busy}
                   onClick={() => {
-                    void createInvite(currentHousehold.id).then(setLastInvite);
+                    setBusy(true);
+                    void createInvite(currentHousehold.id)
+                      .then(inv =>
+                        setLastInvite({
+                          code: inv.code,
+                          expiresAt: inv.expiresAt,
+                        })
+                      )
+                      .finally(() => setBusy(false));
                   }}
                 >
                   {t('voyage.createInvite')}
                 </Button>
               </div>
               {lastInvite ? (
-                <p className="bg-surface-2 mt-3 break-all rounded-md p-2 text-xs">
-                  {t('voyage.inviteReady')}: {lastInvite}
-                </p>
+                <InviteShare
+                  code={lastInvite.code}
+                  expiresAt={lastInvite.expiresAt}
+                  onClose={() => setLastInvite(null)}
+                />
               ) : null}
             </Card>
           </div>

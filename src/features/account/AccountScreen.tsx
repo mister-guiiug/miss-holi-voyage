@@ -65,7 +65,28 @@ export function AccountScreen() {
               admin ? <Badge tone="info">{t('account.admin')}</Badge> : null
             }
           />
-          <Button variant="outline" onClick={() => void signOut()}>
+          {error ? (
+            <p role="alert" className="text-danger m-0 text-sm">
+              {error}
+            </p>
+          ) : null}
+          <Button
+            variant="outline"
+            disabled={busy}
+            onClick={() => {
+              setBusy(true);
+              setError(null);
+              void signOut()
+                .catch((cause: unknown) => {
+                  setError(
+                    cause instanceof Error
+                      ? cause.message
+                      : t('account.signOutFailed')
+                  );
+                })
+                .finally(() => setBusy(false));
+            }}
+          >
             {t('account.signOut')}
           </Button>
         </Card>
