@@ -37,24 +37,20 @@ export type MemberInterestId = z.infer<typeof memberInterestIdSchema>;
 
 export const MAX_MEMBER_INTERESTS = 4;
 
-export const MEMBER_INTERESTS: readonly {
-  id: MemberInterestId;
-  /** Emoji stable (pas de dépendance icône lourde pour 13 pastilles). */
-  emoji: string;
-}[] = [
-  { id: 'detente', emoji: '⛱️' },
-  { id: 'culturel', emoji: '🏛️' },
-  { id: 'nature', emoji: '🌳' },
-  { id: 'gastronomie', emoji: '🍷' },
-  { id: 'randonnee', emoji: '🥾' },
-  { id: 'plongee', emoji: '🤿' },
-  { id: 'familial', emoji: '👨‍👩‍👧' },
-  { id: 'baroudeur', emoji: '🎒' },
-  { id: 'photographe', emoji: '📷' },
-  { id: 'sportif', emoji: '🚴' },
-  { id: 'festivalier', emoji: '🎉' },
-  { id: 'romantique', emoji: '💑' },
-  { id: 'lent', emoji: '🌿' },
+export const MEMBER_INTERESTS: readonly { id: MemberInterestId }[] = [
+  { id: 'detente' },
+  { id: 'culturel' },
+  { id: 'nature' },
+  { id: 'gastronomie' },
+  { id: 'randonnee' },
+  { id: 'plongee' },
+  { id: 'familial' },
+  { id: 'baroudeur' },
+  { id: 'photographe' },
+  { id: 'sportif' },
+  { id: 'festivalier' },
+  { id: 'romantique' },
+  { id: 'lent' },
 ];
 
 export function isMemberInterestId(value: string): value is MemberInterestId {

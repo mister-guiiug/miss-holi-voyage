@@ -8,7 +8,7 @@ import { useI18n } from '../../i18n/index.ts';
 import { inviteShareUrl } from '../../entities/invite-code.ts';
 
 /**
- * Partage d’invitation : code court unique + QR (peer `uqr` via le socle).
+ * Partage d’invitation : code monospace + QR, panneau fileté.
  */
 export function InviteShare({
   code,
@@ -29,7 +29,7 @@ export function InviteShare({
     void qrToDataUrl(shareUrl, {
       width: 220,
       margin: 4,
-      color: { dark: '#061018', light: '#ffffff' },
+      color: { dark: '#0a1620', light: '#faf7f1' },
     })
       .then(url => {
         if (!cancelled) setQr(url);
@@ -43,14 +43,9 @@ export function InviteShare({
   }, [shareUrl]);
 
   return (
-    <div className="bg-surface-2 mt-4 flex flex-col items-center gap-3 rounded-md p-4">
-      <p className="text-muted m-0 text-xs uppercase tracking-wide">
-        {t('voyage.inviteCodeLabel')}
-      </p>
-      <p
-        className="voyage-brand m-0 font-mono text-3xl tracking-[0.2em]"
-        data-testid="invite-code"
-      >
+    <div className="voyage-invite-panel">
+      <p className="text-muted m-0 text-sm">{t('voyage.inviteCodeLabel')}</p>
+      <p className="voyage-invite-code m-0" data-testid="invite-code">
         {code}
       </p>
       <p className="text-muted m-0 text-center text-xs">
@@ -62,7 +57,11 @@ export function InviteShare({
         <img
           src={qr}
           alt={t('voyage.inviteQrAlt')}
-          className="border-border h-52 w-52 rounded-md border bg-white p-2"
+          className="h-52 w-52 border border-solid p-2"
+          style={{
+            borderColor: 'var(--voyage-ink-faint)',
+            background: 'var(--dwc-surface)',
+          }}
         />
       ) : (
         <Skeleton width={208} height={208} radius="md" />

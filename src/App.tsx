@@ -5,7 +5,7 @@ import {
   Routes,
   useLocation,
 } from 'react-router-dom';
-import { Home, Info, Settings, UserRound } from 'lucide-react';
+import { Home, Info, Settings, UserRound, Users } from 'lucide-react';
 import { AppShell } from '@mister-guiiug/dev-pwa-config/react/app-shell';
 import { ObservabilityBoundary } from '@mister-guiiug/dev-pwa-config/react/error-boundary';
 import { ConnectionBanner } from '@mister-guiiug/dev-pwa-config/react/connection-banner';
@@ -15,6 +15,7 @@ import { AppUpdates } from '@mister-guiiug/dev-pwa-config/react/app-updates';
 import { registerSW } from 'virtual:pwa-register';
 import { useI18n } from './i18n/index.ts';
 import { HomeScreen } from './features/voyage/HomeScreen.tsx';
+import { HouseholdScreen } from './features/voyage/HouseholdScreen.tsx';
 import { JoinScreen } from './features/voyage/JoinScreen.tsx';
 import { TripWizardScreen } from './features/voyage/TripWizardScreen.tsx';
 import { useSolarPhase } from './features/voyage/useSolarPhase.ts';
@@ -74,6 +75,11 @@ export function Shell() {
       end: true,
     },
     {
+      href: '/foyer',
+      label: t('nav.household'),
+      icon: <Users aria-hidden="true" />,
+    },
+    {
       href: '/reglages',
       label: t('nav.settings'),
       icon: <Settings aria-hidden="true" />,
@@ -102,6 +108,7 @@ export function Shell() {
   const joinMatch = pathname.startsWith('/rejoindre');
   const titles: Record<string, string> = {
     '/': t('app.name'),
+    '/foyer': t('voyage.householdMenu'),
     '/reglages': t('settings.title'),
     '/compte': t('account.title'),
     '/a-propos': t('about.title'),
@@ -164,6 +171,7 @@ export function Shell() {
     >
       <Routes>
         <Route path="/" element={<HomeScreen />} />
+        <Route path="/foyer" element={<HouseholdScreen />} />
         <Route path="/voyage/:tripId" element={<TripWizardScreen />} />
         <Route path="/rejoindre" element={<JoinScreen />} />
         <Route path="/rejoindre/:code" element={<JoinScreen />} />
