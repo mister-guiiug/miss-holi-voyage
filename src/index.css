@@ -382,8 +382,16 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
   background: transparent;
 }
 
-.voyage-sheet__title {
+.voyage-sheet__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.85rem;
   margin: 0 0 0.85rem;
+}
+
+.voyage-sheet__title {
+  margin: 0;
   font-family: var(--font-display);
   font-size: 1.35rem;
   font-weight: 650;
@@ -397,6 +405,83 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
   font-size: 0.9rem;
   color: var(--dwc-text-soft);
   line-height: 1.45;
+}
+
+.voyage-sheet--locked {
+  opacity: 0.98;
+}
+
+.voyage-sheet--locked .voyage-sheet__title {
+  color: var(--dwc-text);
+}
+
+/* Pastilles d’état d’étape (brouillon / validée / figée) */
+
+.voyage-step-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--voyage-ink-faint);
+  border-radius: 2px;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  background: var(--dwc-surface);
+  color: var(--dwc-text-soft);
+  white-space: nowrap;
+}
+
+.voyage-step-badge__prefix {
+  font-weight: 500;
+  opacity: 0.75;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.72rem;
+}
+
+.voyage-step-badge--draft {
+  border-style: dashed;
+  color: var(--dwc-text-soft);
+}
+
+.voyage-step-badge--ready {
+  border-color: color-mix(
+    in oklab,
+    var(--voyage-accent) 55%,
+    var(--voyage-ink-faint)
+  );
+  color: var(--voyage-accent);
+  background: color-mix(in oklab, var(--voyage-accent) 10%, var(--dwc-surface));
+}
+
+.voyage-step-badge--locked {
+  border-color: var(--dwc-text);
+  color: var(--dwc-text);
+  background: color-mix(in oklab, var(--dwc-text) 6%, var(--dwc-surface));
+}
+
+.voyage-step-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--voyage-ink-faint);
+}
+
+.voyage-step-actions__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.voyage-step-actions__hint {
+  font-size: 0.8rem;
+  color: var(--dwc-text-soft);
 }
 
 .voyage-ink-link {
@@ -776,7 +861,7 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
 .voyage-step-rail {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 1.25rem;
+  gap: 0.55rem 0.85rem;
   margin: 0;
   padding: 0.75rem 0 0;
   list-style: none;
@@ -784,6 +869,10 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
 }
 
 .voyage-step-rail__item {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.45rem;
   font-size: 0.8rem;
   color: var(--dwc-text-soft);
 }
@@ -792,7 +881,10 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
   font-variant-numeric: tabular-nums;
   color: var(--dwc-text);
   font-weight: 600;
-  margin-right: 0.35rem;
+}
+
+.voyage-step-rail__label {
+  color: var(--dwc-text);
 }
 
 .voyage-step-rail__item--ready .voyage-step-rail__num {
@@ -801,6 +893,14 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
 
 .voyage-step-rail__item--locked {
   color: var(--dwc-text);
+}
+
+.voyage-step-rail__item--locked .voyage-step-rail__label {
+  font-weight: 600;
+}
+
+.voyage-step-rail__item .voyage-step-badge {
+  margin-left: 0.1rem;
 }
 
 .voyage-invite-code {

@@ -96,8 +96,7 @@ export function StyleChoice({
 
   return (
     <div className="voyage-style-choice">
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="voyage-sheet__title m-0">{t('voyage.step.style')}</h3>
+      <div className="mb-3 flex flex-wrap items-baseline justify-end gap-2">
         <button
           type="button"
           className="voyage-ink-btn text-sm"

@@ -15,18 +15,22 @@ import {
   type Destination,
   type DestinationContinent,
 } from '../../entities/destinations.ts';
+import type { StepStatus } from '../../entities/schemas.ts';
 import { useI18n } from '../../i18n/index.ts';
+import { StepActions } from './StepActions.tsx';
 
 type Props = {
   country: string;
   region: string;
   /** YYYY-MM-DD — filtre le catalogue sur le mois de départ. */
   dateStart?: string;
+  status: StepStatus;
   onCountryChange: (value: string) => void;
   onRegionChange: (value: string) => void;
   onPick: (dest: Destination, place?: string) => void;
   onMarkReady: () => void;
   onLock: () => void;
+  onUnlock: () => void;
 };
 
 function monthFromDate(iso: string | undefined): number | null {
@@ -131,11 +135,13 @@ export function DestinationStep({
   country,
   region,
   dateStart,
+  status,
   onCountryChange,
   onRegionChange,
   onPick,
   onMarkReady,
   onLock,
+  onUnlock,
 }: Props) {
   const { t } = useI18n();
   const searchId = useId();
@@ -145,11 +151,12 @@ export function DestinationStep({
   /** Recherche / catalogue visibles tant qu’aucune destination, ou après « Changer ». */
   const [browseMode, setBrowseMode] = useState(() => !country.trim());
 
+  const locked = status === 'locked';
   const month = monthFromDate(dateStart);
   const code = countryCodeForName(country);
   const flag = flagEmoji(code);
   const hasChoice = Boolean(country.trim());
-  const showSearch = browseMode || !hasChoice;
+  const showSearch = !locked && (browseMode || !hasChoice);
   const matched = useMemo(
     () => matchDestination(country, region),
     [country, region]
@@ -191,13 +198,16 @@ export function DestinationStep({
   };
 
   const startChange = () => {
+    if (locked) return;
     setBrowseMode(true);
     setCatalogOpen(true);
     setQuery('');
   };
 
   return (
-    <div className="voyage-destination flex flex-col gap-4">
+    <div
+      className={`voyage-destination flex flex-col gap-4${locked ? ' voyage-destination--locked' : ''}`}
+    >
       {showSearch ? (
         <div className="voyage-destination__search">
           <label
@@ -262,14 +272,16 @@ export function DestinationStep({
                   : ''}
               </p>
             </div>
-            <Button type="button" variant="secondary" onClick={startChange}>
-              {t('voyage.destinationChange')}
-            </Button>
+            {!locked ? (
+              <Button type="button" variant="secondary" onClick={startChange}>
+                {t('voyage.destinationChange')}
+              </Button>
+            ) : null}
           </div>
         </div>
       ) : null}
 
-      {hasChoice && !showSearch ? (
+      {hasChoice && !showSearch && !locked ? (
         <div className="voyage-destination__fields flex flex-col gap-3">
           <div className="voyage-destination__country-row">
             {flag ? (
@@ -456,14 +468,13 @@ export function DestinationStep({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" onClick={onMarkReady}>
-          {t('voyage.markReady')}
-        </Button>
-        <Button type="button" variant="secondary" onClick={onLock}>
-          {t('voyage.lock')}
-        </Button>
-      </div>
+      <StepActions
+        status={status}
+        canMarkReady={hasChoice}
+        onMarkReady={onMarkReady}
+        onLock={onLock}
+        onUnlock={onUnlock}
+      />
     </div>
   );
 }

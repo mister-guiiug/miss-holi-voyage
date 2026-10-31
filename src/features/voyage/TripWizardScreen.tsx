@@ -8,6 +8,8 @@ import { useI18n } from '../../i18n/index.ts';
 import { useVoyage } from './store.ts';
 import { StyleChoice } from './StyleChoice.tsx';
 import { DestinationStep } from './DestinationStep.tsx';
+import { StepActions } from './StepActions.tsx';
+import { StepStatusBadge } from './StepStatusBadge.tsx';
 import { VoyageSheet } from './VoyageSheet.tsx';
 
 export function TripWizardScreen() {
@@ -87,7 +89,7 @@ export function TripWizardScreen() {
     <div className="voyage-shell flex flex-col gap-1">
       <header className="pb-2 pt-1">
         <h2 className="voyage-brand m-0 text-3xl">{trip.title}</h2>
-        <ol className="voyage-step-rail">
+        <ol className="voyage-step-rail" aria-label={t('voyage.stepsOverview')}>
           {STEP_ORDER.map((key, i) => {
             const status = stepStatus(key);
             return (
@@ -96,22 +98,25 @@ export function TripWizardScreen() {
                 className={`voyage-step-rail__item voyage-step-rail__item--${status}`}
               >
                 <span className="voyage-step-rail__num">{i + 1}.</span>
-                {t(`voyage.step.${key}`)}
-                <span className="text-muted">
-                  {' '}
-                  — {t(`voyage.stepStatus.${status}`)}
+                <span className="voyage-step-rail__label">
+                  {t(`voyage.step.${key}`)}
                 </span>
+                <StepStatusBadge status={status} />
               </li>
             );
           })}
         </ol>
       </header>
 
-      <VoyageSheet title={t('voyage.step.destination')}>
+      <VoyageSheet
+        title={t('voyage.step.destination')}
+        status={stepStatus('destination')}
+      >
         <DestinationStep
           country={country}
           region={region}
           dateStart={dateStart || trip.dateWindowStart || undefined}
+          status={stepStatus('destination')}
           onCountryChange={setCountry}
           onRegionChange={value => {
             setRegion(value);
@@ -125,6 +130,10 @@ export function TripWizardScreen() {
               destinationCountry: dest.country,
               destinationRegion: nextRegion,
               destinationNotes: `${dest.summary}\nSource: ${dest.sourceUrl}`,
+            }).then(() => {
+              if (stepStatus('destination') === 'ready') {
+                void setStepStatus(trip.id, 'destination', 'draft');
+              }
             });
           }}
           onMarkReady={() => {
@@ -134,10 +143,11 @@ export function TripWizardScreen() {
             }).then(() => setStepStatus(trip.id, 'destination', 'ready'));
           }}
           onLock={() => void setStepStatus(trip.id, 'destination', 'locked')}
+          onUnlock={() => void setStepStatus(trip.id, 'destination', 'ready')}
         />
       </VoyageSheet>
 
-      <VoyageSheet title={t('voyage.step.specs')}>
+      <VoyageSheet title={t('voyage.step.specs')} status={stepStatus('specs')}>
         <Button type="button" onClick={() => void suggestQuestions(trip.id)}>
           {t('voyage.suggestQuestions')}
         </Button>
@@ -177,17 +187,15 @@ export function TripWizardScreen() {
             </li>
           ))}
         </ul>
-        <Button
-          type="button"
-          className="mt-3"
-          variant="secondary"
-          onClick={() => void setStepStatus(trip.id, 'specs', 'ready')}
-        >
-          {t('voyage.markReady')}
-        </Button>
+        <StepActions
+          status={stepStatus('specs')}
+          onMarkReady={() => void setStepStatus(trip.id, 'specs', 'ready')}
+          onLock={() => void setStepStatus(trip.id, 'specs', 'locked')}
+          onUnlock={() => void setStepStatus(trip.id, 'specs', 'ready')}
+        />
       </VoyageSheet>
 
-      <VoyageSheet title={t('voyage.step.dates')}>
+      <VoyageSheet title={t('voyage.step.dates')} status={stepStatus('dates')}>
         <div className="voyage-dates flex flex-col gap-3">
           <label className="voyage-dates__field">
             <span className="voyage-dates__icon" aria-hidden="true">
@@ -257,9 +265,9 @@ export function TripWizardScreen() {
             value={budget}
             onChange={e => setBudget(e.target.value)}
           />
-          <Button
-            type="button"
-            onClick={() => {
+          <StepActions
+            status={stepStatus('dates')}
+            onMarkReady={() => {
               const ceiling = budget.trim() ? Number(budget) : null;
               void updateTrip(trip.id, {
                 dateWindowStart: dateStart || null,
@@ -268,13 +276,16 @@ export function TripWizardScreen() {
                   ceiling != null && !Number.isNaN(ceiling) ? ceiling : null,
               }).then(() => setStepStatus(trip.id, 'dates', 'ready'));
             }}
-          >
-            {t('voyage.markReady')}
-          </Button>
+            onLock={() => void setStepStatus(trip.id, 'dates', 'locked')}
+            onUnlock={() => void setStepStatus(trip.id, 'dates', 'ready')}
+          />
         </div>
       </VoyageSheet>
 
-      <VoyageSheet title={t('voyage.step.flights')}>
+      <VoyageSheet
+        title={t('voyage.step.flights')}
+        status={stepStatus('flights')}
+      >
         <form
           className="flex flex-col gap-3"
           onSubmit={e => {
@@ -345,17 +356,15 @@ export function TripWizardScreen() {
             </tbody>
           </table>
         </div>
-        <Button
-          type="button"
-          className="mt-3"
-          variant="secondary"
-          onClick={() => void setStepStatus(trip.id, 'flights', 'ready')}
-        >
-          {t('voyage.markReady')}
-        </Button>
+        <StepActions
+          status={stepStatus('flights')}
+          onMarkReady={() => void setStepStatus(trip.id, 'flights', 'ready')}
+          onLock={() => void setStepStatus(trip.id, 'flights', 'locked')}
+          onUnlock={() => void setStepStatus(trip.id, 'flights', 'ready')}
+        />
       </VoyageSheet>
 
-      <VoyageSheet>
+      <VoyageSheet title={t('voyage.step.style')} status={stepStatus('style')}>
         <StyleChoice
           currentStyle={trip.style}
           proposals={styleProposals}
@@ -366,9 +375,18 @@ export function TripWizardScreen() {
             );
           }}
         />
+        <StepActions
+          status={stepStatus('style')}
+          onMarkReady={() => void setStepStatus(trip.id, 'style', 'ready')}
+          onLock={() => void setStepStatus(trip.id, 'style', 'locked')}
+          onUnlock={() => void setStepStatus(trip.id, 'style', 'ready')}
+        />
       </VoyageSheet>
 
-      <VoyageSheet title={t('voyage.step.excursions')}>
+      <VoyageSheet
+        title={t('voyage.step.excursions')}
+        status={stepStatus('excursions')}
+      >
         <Button type="button" onClick={() => void proposePois(trip.id)}>
           {t('voyage.proposePois')}
         </Button>
@@ -402,14 +420,12 @@ export function TripWizardScreen() {
             );
           })}
         </ul>
-        <Button
-          type="button"
-          className="mt-3"
-          variant="secondary"
-          onClick={() => void setStepStatus(trip.id, 'excursions', 'ready')}
-        >
-          {t('voyage.markReady')}
-        </Button>
+        <StepActions
+          status={stepStatus('excursions')}
+          onMarkReady={() => void setStepStatus(trip.id, 'excursions', 'ready')}
+          onLock={() => void setStepStatus(trip.id, 'excursions', 'locked')}
+          onUnlock={() => void setStepStatus(trip.id, 'excursions', 'ready')}
+        />
       </VoyageSheet>
 
       <VoyageSheet title={t('voyage.artifactsTitle')}>
