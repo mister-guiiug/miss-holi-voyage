@@ -16,6 +16,7 @@ import { registerSW } from 'virtual:pwa-register';
 import { useI18n } from './i18n/index.ts';
 import { HomeScreen } from './features/voyage/HomeScreen.tsx';
 import { TripWizardScreen } from './features/voyage/TripWizardScreen.tsx';
+import { useSolarPhase } from './features/voyage/useSolarPhase.ts';
 import { SettingsScreen } from './features/settings/SettingsScreen.tsx';
 import { AboutScreen } from './features/about/AboutScreen.tsx';
 import { AccountScreen } from './features/account/AccountScreen.tsx';
@@ -48,6 +49,7 @@ import { AccountScreen } from './features/account/AccountScreen.tsx';
 export function Shell() {
   const { t } = useI18n();
   const { pathname } = useLocation();
+  useSolarPhase();
 
   /*
    * UNE VUE DE PAGE PAR NAVIGATION — ni zéro, ni deux. PostHog en envoie une

@@ -23,7 +23,7 @@
     "type-check": "tsc -b",
     "type-check:7": "pwa-typecheck-7",
     "doctor": "pwa-doctor",
-    "icons": "pwa-icons --source public/favicon.svg --out public/icons --maskable --bg 59,110,165",
+    "icons": "pwa-icons --source public/favicon.svg --out public/icons --maskable --bg 6,16,24",
     "prepare": "husky || true",
     "screenshots": "pwa-screenshots --wide-path reglages"
   },
@@ -63,6 +63,8 @@
     "vitest": "^5.0.5"
   },
   "dependencies": {
+    "@fontsource-variable/dm-sans": "^5.3.0",
+    "@fontsource-variable/literata": "^5.3.0",
     "@supabase/supabase-js": "^2.118.0",
     "lucide-react": "^1.64.0",
     "posthog-js": "^1.442.1",
