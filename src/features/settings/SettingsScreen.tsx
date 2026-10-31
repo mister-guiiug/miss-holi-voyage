@@ -9,6 +9,7 @@ import { dateSlug, downloadText } from '@mister-guiiug/dev-pwa-config/download';
 import { useI18n } from '../../i18n/index.ts';
 import { backend, coverage } from '../../backend/index.ts';
 import { useNotes } from '../home/store.ts';
+import { useVoyage } from '../voyage/store.ts';
 import { configReport } from '../../app/config/env.ts';
 import {
   VOYAGE_THEMES,
@@ -37,13 +38,15 @@ import {
 export function SettingsScreen() {
   const { t, m, fmt, locale, setLocale, locales } = useI18n();
   const { theme: voyageTheme, setTheme: setVoyageTheme } = useVoyageTheme();
-  const clear = useNotes(state => state.clear);
+  const clearNotes = useNotes(state => state.clear);
+  const clearVoyage = useVoyage(state => state.clear);
   const importJson = useNotes(state => state.importJson);
   const notes = useNotes(state => state.notes);
   const ready = useNotes(state => state.ready);
   const load = useNotes(state => state.load);
   const error = useNotes(state => state.error);
   const [confirming, setConfirming] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   // Ouvert directement (lien profond, rechargement), cet écran ne sait pas si
   // des notes existent tant que le port n'a pas été lu : sans cette lecture,
@@ -186,10 +189,22 @@ export function SettingsScreen() {
         title={t('settings.resetConfirm')}
         message={t('settings.resetBody')}
         onConfirm={() => {
-          void clear();
-          setConfirming(false);
+          if (resetting) return;
+          setResetting(true);
+          // Notes ET foyer/voyages : « Tout effacer » laissait le magasin
+          // voyage intact — le foyer survivait au wipe (mesuré en QA).
+          void Promise.all([clearNotes(), clearVoyage()])
+            .catch(() => {
+              /* les stores portent déjà l’erreur */
+            })
+            .finally(() => {
+              setResetting(false);
+              setConfirming(false);
+            });
         }}
-        onCancel={() => setConfirming(false)}
+        onCancel={() => {
+          if (!resetting) setConfirming(false);
+        }}
       />
 
       <ConfirmDialog

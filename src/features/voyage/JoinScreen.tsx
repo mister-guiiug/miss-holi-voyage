@@ -2,16 +2,25 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
+import { useAuthContext } from '@mister-guiiug/dev-pwa-config/react/auth-provider';
 import { useI18n } from '../../i18n/index.ts';
+import { coverage } from '../../backend/index.ts';
 import { normalizeInviteCode } from '../../entities/invite-code.ts';
 import { useVoyage } from './store.ts';
 import { VoyageSheet } from './VoyageSheet.tsx';
+
+function mapInviteError(cause: unknown, needSignIn: string, invalid: string) {
+  const message = cause instanceof Error ? cause.message : String(cause);
+  if (/session|connectez|sign in/i.test(message)) return needSignIn;
+  return invalid;
+}
 
 /**
  * Rejoindre un foyer via code court (lien profond `/rejoindre/:code` ou saisie).
  */
 export function JoinScreen() {
   const { t } = useI18n();
+  const { signedIn } = useAuthContext();
   const { code: routeCode } = useParams<{ code?: string }>();
   const navigate = useNavigate();
   const acceptInvite = useVoyage(s => s.acceptInvite);
@@ -21,6 +30,7 @@ export function JoinScreen() {
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const remoteInvites = coverage.kind === 'supabase';
 
   useEffect(() => {
     void load();
@@ -36,13 +46,23 @@ export function JoinScreen() {
       setError(t('voyage.inviteInvalid'));
       return;
     }
+    if (remoteInvites && !signedIn) {
+      setError(t('voyage.inviteNeedSignIn'));
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
       await acceptInvite(normalized);
       navigate('/', { replace: true });
-    } catch {
-      setError(t('voyage.inviteInvalid'));
+    } catch (cause) {
+      setError(
+        mapInviteError(
+          cause,
+          t('voyage.inviteNeedSignIn'),
+          t('voyage.inviteInvalid')
+        )
+      );
     } finally {
       setBusy(false);
     }
@@ -50,17 +70,29 @@ export function JoinScreen() {
 
   useEffect(() => {
     if (!routeCode) return;
+    if (remoteInvites && !signedIn) {
+      setError(t('voyage.inviteNeedSignIn'));
+      return;
+    }
     let cancelled = false;
     const run = async () => {
       const normalized = normalizeInviteCode(routeCode);
-      if (normalized.replace('-', '').length < 8) return;
+      if (normalized.replace(/-/g, '').length < 8) return;
       setBusy(true);
       setError(null);
       try {
         await acceptInvite(normalized);
         if (!cancelled) navigate('/', { replace: true });
-      } catch {
-        if (!cancelled) setError(t('voyage.inviteInvalid'));
+      } catch (cause) {
+        if (!cancelled) {
+          setError(
+            mapInviteError(
+              cause,
+              t('voyage.inviteNeedSignIn'),
+              t('voyage.inviteInvalid')
+            )
+          );
+        }
       } finally {
         if (!cancelled) setBusy(false);
       }
@@ -69,7 +101,7 @@ export function JoinScreen() {
     return () => {
       cancelled = true;
     };
-  }, [routeCode, acceptInvite, navigate, t]);
+  }, [routeCode, acceptInvite, navigate, t, remoteInvites, signedIn]);
 
   return (
     <VoyageSheet title={t('voyage.joinTitle')} lead={t('voyage.joinHint')}>
@@ -90,12 +122,17 @@ export function JoinScreen() {
         />
         {error ? (
           <p role="alert" className="text-danger m-0 text-sm">
-            {error}
+            {error}{' '}
+            {error === t('voyage.inviteNeedSignIn') ? (
+              <Link to="/compte" className="voyage-ink-link">
+                {t('nav.account')}
+              </Link>
+            ) : null}
           </p>
         ) : null}
         <Button
           type="submit"
-          disabled={busy || code.replace('-', '').length < 8}
+          disabled={busy || code.replace(/-/g, '').length < 8}
         >
           {t('voyage.acceptInvite')}
         </Button>

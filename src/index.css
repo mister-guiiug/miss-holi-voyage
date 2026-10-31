@@ -920,6 +920,18 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
   gap: 0.75rem;
 }
 
+.voyage-invite-warn {
+  max-width: 28rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid
+    color-mix(in oklab, var(--voyage-accent) 45%, var(--voyage-ink-faint));
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--voyage-accent) 8%, var(--dwc-surface));
+  color: var(--dwc-text);
+  text-align: left;
+  line-height: 1.4;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .voyage-member-add--open,
   .voyage-trip-hero {
