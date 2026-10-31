@@ -7,9 +7,7 @@ import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
 import { ErrorBanner } from '@mister-guiiug/dev-pwa-config/react/error-banner';
 import { SkeletonGroup } from '@mister-guiiug/dev-pwa-config/react/skeleton';
 import { useToast } from '@mister-guiiug/dev-pwa-config/react/toast';
-import { AppFooter } from '@mister-guiiug/dev-pwa-config/react/app-footer';
 import { useI18n } from '../../i18n/index.ts';
-import { REPO_URL } from '../../app/links.ts';
 import { notesSync } from '../../backend/index.ts';
 import { useNotes } from './store.ts';
 import { SyncState } from './SyncState.tsx';
@@ -195,13 +193,6 @@ export function HomeScreen() {
           </ul>
         </>
       )}
-
-      {/* Le lien de soutien n'est pas passé : `AppFooter` le prend au
-          catalogue de la famille, source unique du pseudo. `issues` ajoute
-          « Signaler un problème » : le gabarit `bug.yml` du compte, prérempli
-          avec la version, le commit, l'écran et le navigateur — ce qu'un
-          rapport n'a jamais quand on le demande après coup. */}
-      <AppFooter repoUrl={REPO_URL} issues className="mt-8" />
     </>
   );
 }

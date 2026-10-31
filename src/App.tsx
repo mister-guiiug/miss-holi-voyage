@@ -14,7 +14,8 @@ import { usePageViews } from '@mister-guiiug/dev-pwa-config/react/use-page-views
 import { AppUpdates } from '@mister-guiiug/dev-pwa-config/react/app-updates';
 import { registerSW } from 'virtual:pwa-register';
 import { useI18n } from './i18n/index.ts';
-import { HomeScreen } from './features/home/HomeScreen.tsx';
+import { HomeScreen } from './features/voyage/HomeScreen.tsx';
+import { TripWizardScreen } from './features/voyage/TripWizardScreen.tsx';
 import { SettingsScreen } from './features/settings/SettingsScreen.tsx';
 import { AboutScreen } from './features/about/AboutScreen.tsx';
 import { AccountScreen } from './features/account/AccountScreen.tsx';
@@ -94,6 +95,7 @@ export function Shell() {
    * « Connexion », le nom du dépôt. Le titre de l'écran descend d'un cran,
    * en `h2`, dans `HomeScreen`.
    */
+  const tripMatch = pathname.match(/^\/voyage\/[^/]+/);
   const titles: Record<string, string> = {
     '/': t('app.name'),
     '/reglages': t('settings.title'),
@@ -103,7 +105,9 @@ export function Shell() {
 
   return (
     <AppShell
-      title={titles[pathname] ?? t('app.name')}
+      title={
+        tripMatch ? t('voyage.trips') : (titles[pathname] ?? t('app.name'))
+      }
       backHref={pathname === '/' ? undefined : '/'}
       linkComponent={Link}
       hrefProp="to"
@@ -152,6 +156,7 @@ export function Shell() {
     >
       <Routes>
         <Route path="/" element={<HomeScreen />} />
+        <Route path="/voyage/:tripId" element={<TripWizardScreen />} />
         <Route path="/reglages" element={<SettingsScreen />} />
         <Route path="/compte" element={<AccountScreen />} />
         <Route path="/a-propos" element={<AboutScreen />} />

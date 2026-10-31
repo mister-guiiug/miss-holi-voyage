@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { VoyageRepository } from './voyage-ports.ts';
 
 /**
  * Le modèle, décrit par un schéma dont le type est DÉRIVÉ.
@@ -68,4 +69,5 @@ export interface NotesRepository {
 
 export interface Backend {
   notes: NotesRepository;
+  voyage: VoyageRepository;
 }

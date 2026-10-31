@@ -1,6 +1,7 @@
 import { createVersionedStore } from '@mister-guiiug/dev-pwa-config/versioned-store';
 import type { Backend, NotesSnapshot } from './ports.ts';
 import { notesStoreOptions } from './notes-file.ts';
+import { createLocalVoyage } from './voyage-local.ts';
 
 /**
  * L'adaptateur local : `versioned-store` du socle, pas `localStorage` nu.
@@ -53,5 +54,8 @@ export function createLocalBackend(): Backend {
       // refusé sans rien effacer.
       import: async json => notesStore.import(json),
     },
+    // Voyage : magasin local (et filet si Supabase n’est pas encore branché
+    // pour ce port). Les migrations 0006 posent le schéma collab distant.
+    voyage: createLocalVoyage(),
   };
 }
