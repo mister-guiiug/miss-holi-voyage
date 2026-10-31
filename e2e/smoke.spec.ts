@@ -33,7 +33,9 @@ test.describe('@critical le cadre', () => {
     await page.getByLabel('Nom du foyer').fill(foyer);
     await page.getByRole('button', { name: 'Créer le foyer' }).click();
     // Après création, l'accueil montre un teaser (lien), pas un h2.
-    await expect(page.getByRole('link', { name: new RegExp(foyer) })).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: new RegExp(foyer) })
+    ).toBeVisible();
 
     const voyage = `voyage e2e ${Date.now()}`;
     await page.getByLabel('Titre du voyage').fill(voyage);
@@ -41,7 +43,9 @@ test.describe('@critical le cadre', () => {
     await expect(page.getByRole('link', { name: voyage })).toBeVisible();
 
     await page.reload();
-    await expect(page.getByRole('link', { name: new RegExp(foyer) })).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: new RegExp(foyer) })
+    ).toBeVisible();
     await expect(page.getByRole('link', { name: voyage })).toBeVisible();
   });
 
@@ -49,7 +53,9 @@ test.describe('@critical le cadre', () => {
     await page.goto('/');
     await page.getByLabel('Nom du foyer').fill(`foyer membre ${Date.now()}`);
     await page.getByRole('button', { name: 'Créer le foyer' }).click();
-    await expect(page.getByRole('link', { name: /Gérer le foyer/ })).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: /Gérer le foyer/ })
+    ).toBeVisible();
 
     await page.getByRole('link', { name: 'Foyer', exact: true }).click();
     // Formulaire d’ajout déjà ouvert quand le foyer est vide.
@@ -75,7 +81,9 @@ test.describe('@critical le cadre', () => {
     const foyer = `foyer offline ${Date.now()}`;
     await page.getByLabel('Nom du foyer').fill(foyer);
     await page.getByRole('button', { name: 'Créer le foyer' }).click();
-    await expect(page.getByRole('link', { name: new RegExp(foyer) })).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: new RegExp(foyer) })
+    ).toBeVisible();
 
     await context.setOffline(true);
     await expect(page.locator('[data-dwc="connection-banner"]')).toBeVisible({

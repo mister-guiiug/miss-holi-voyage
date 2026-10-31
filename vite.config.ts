@@ -76,6 +76,11 @@ export default defineConfig(({ command }) => {
         // l'échec ne se verrait qu'en console, sur le site déployé, une fois
         // le consentement donné.
         analytics: true,
+        // Sans Supabase dans connect-src, Auth et PostgREST partent en
+        // « Failed to fetch » derrière la CSP — formulaire Compte visible
+        // (backend retenu) mais connexion / déconnexion mortes. Motif
+        // lookhouse / settle.
+        connectSrc: ["'self'", 'https://*.supabase.co', 'wss://*.supabase.co'],
       }),
 
       // Repli SPA : sans `404.html`, rafraîchir un lien profond sert la page
