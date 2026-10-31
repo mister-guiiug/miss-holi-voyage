@@ -261,6 +261,11 @@ const fr = {
       style: 'Base fixe ou roadtrip',
       excursions: 'Excursions / sites',
     },
+    stepStatus: {
+      draft: 'brouillon',
+      ready: 'prêt',
+      locked: 'verrouillé',
+    },
     vote: {
       interested: 'Oui',
       maybe: 'Peut-être',
@@ -508,6 +513,11 @@ const en: typeof fr = {
       flights: 'Round-trip flights',
       style: 'Hub or roadtrip',
       excursions: 'Excursions / sites',
+    },
+    stepStatus: {
+      draft: 'draft',
+      ready: 'ready',
+      locked: 'locked',
     },
     vote: {
       interested: 'Yes',

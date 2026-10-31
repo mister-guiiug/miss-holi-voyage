@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
-import { Card } from '@mister-guiiug/dev-pwa-config/react/card';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { SkeletonGroup } from '@mister-guiiug/dev-pwa-config/react/skeleton';
 import { STEP_ORDER, ARTIFACT_TYPES_W2 } from '../../entities/schemas.ts';
 import { useI18n } from '../../i18n/index.ts';
 import { useVoyage } from './store.ts';
 import { StyleChoice } from './StyleChoice.tsx';
+import { VoyageSheet } from './VoyageSheet.tsx';
 
 export function TripWizardScreen() {
   const { tripId = '' } = useParams();
@@ -71,7 +71,10 @@ export function TripWizardScreen() {
   if (!trip) {
     return (
       <p>
-        {t('voyage.tripMissing')} <Link to="/">{t('voyage.backHome')}</Link>
+        {t('voyage.tripMissing')}{' '}
+        <Link to="/" className="voyage-ink-link">
+          {t('voyage.backHome')}
+        </Link>
       </p>
     );
   }
@@ -80,25 +83,31 @@ export function TripWizardScreen() {
     tripSteps.find(s => s.stepKey === key)?.status ?? 'draft';
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h2 className="text-xl font-semibold">{trip.title}</h2>
-        <ol className="mt-3 flex flex-wrap gap-2 text-xs">
-          {STEP_ORDER.map(key => (
-            <li
-              key={key}
-              className="border-border rounded-full border px-2 py-1"
-            >
-              {key}: {stepStatus(key)}
-            </li>
-          ))}
+    <div className="voyage-shell flex flex-col gap-1">
+      <header className="pb-2 pt-1">
+        <h2 className="voyage-brand m-0 text-3xl">{trip.title}</h2>
+        <ol className="voyage-step-rail">
+          {STEP_ORDER.map((key, i) => {
+            const status = stepStatus(key);
+            return (
+              <li
+                key={key}
+                className={`voyage-step-rail__item voyage-step-rail__item--${status}`}
+              >
+                <span className="voyage-step-rail__num">{i + 1}.</span>
+                {t(`voyage.step.${key}`)}
+                <span className="text-muted">
+                  {' '}
+                  — {t(`voyage.stepStatus.${status}`)}
+                </span>
+              </li>
+            );
+          })}
         </ol>
-      </div>
+      </header>
 
-      {/* W1 — destination */}
-      <Card>
-        <h3 className="font-semibold">{t('voyage.step.destination')}</h3>
-        <div className="mt-3 flex flex-col gap-3">
+      <VoyageSheet title={t('voyage.step.destination')}>
+        <div className="flex flex-col gap-3">
           <TextField
             label={t('voyage.country')}
             value={country}
@@ -132,22 +141,20 @@ export function TripWizardScreen() {
             </Button>
           </div>
         </div>
-      </Card>
+      </VoyageSheet>
 
-      {/* W1 — specs IA */}
-      <Card>
-        <h3 className="font-semibold">{t('voyage.step.specs')}</h3>
-        <Button
-          type="button"
-          className="mt-3"
-          onClick={() => void suggestQuestions(trip.id)}
-        >
+      <VoyageSheet title={t('voyage.step.specs')}>
+        <Button type="button" onClick={() => void suggestQuestions(trip.id)}>
           {t('voyage.suggestQuestions')}
         </Button>
-        <ul className="mt-4 flex flex-col gap-4">
+        <ul className="mt-4 flex list-none flex-col gap-0 p-0">
           {tripQuestions.map(q => (
-            <li key={q.id} className="border-border border-b pb-3">
-              <p className="font-medium">{q.prompt}</p>
+            <li
+              key={q.id}
+              className="border-0 border-b border-solid py-3"
+              style={{ borderColor: 'var(--voyage-ink-faint)' }}
+            >
+              <p className="m-0 font-medium">{q.prompt}</p>
               <p className="text-muted mt-1 text-xs">{q.rationale}</p>
               {q.status === 'answered' ? (
                 <p className="mt-2 text-sm">{q.answer}</p>
@@ -184,12 +191,10 @@ export function TripWizardScreen() {
         >
           {t('voyage.markReady')}
         </Button>
-      </Card>
+      </VoyageSheet>
 
-      {/* W3 — dates */}
-      <Card>
-        <h3 className="font-semibold">{t('voyage.step.dates')}</h3>
-        <div className="mt-3 flex flex-col gap-3">
+      <VoyageSheet title={t('voyage.step.dates')}>
+        <div className="flex flex-col gap-3">
           <TextField
             label={t('voyage.dateStart')}
             value={dateStart}
@@ -222,13 +227,11 @@ export function TripWizardScreen() {
             {t('voyage.markReady')}
           </Button>
         </div>
-      </Card>
+      </VoyageSheet>
 
-      {/* W3 — vols */}
-      <Card>
-        <h3 className="font-semibold">{t('voyage.step.flights')}</h3>
+      <VoyageSheet title={t('voyage.step.flights')}>
         <form
-          className="mt-3 flex flex-col gap-3"
+          className="flex flex-col gap-3"
           onSubmit={e => {
             e.preventDefault();
             if (!flightLabel.trim()) return;
@@ -262,19 +265,22 @@ export function TripWizardScreen() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr>
-                <th className="p-1">{t('voyage.flightLabel')}</th>
-                <th className="p-1">{t('voyage.flightPrice')}</th>
+                <th className="p-1 font-medium">{t('voyage.flightLabel')}</th>
+                <th className="p-1 font-medium">{t('voyage.flightPrice')}</th>
                 <th className="p-1" />
               </tr>
             </thead>
             <tbody>
               {tripFlights.map(f => (
-                <tr key={f.id} className="border-border border-t">
-                  <td className="p-1">{f.label}</td>
-                  <td className="p-1">
+                <tr
+                  key={f.id}
+                  style={{ borderTop: '1px solid var(--voyage-ink-faint)' }}
+                >
+                  <td className="p-1 py-2">{f.label}</td>
+                  <td className="p-1 py-2">
                     {f.price != null ? `${f.price} ${f.currency}` : '—'}
                   </td>
-                  <td className="p-1">
+                  <td className="p-1 py-2">
                     <Button
                       type="button"
                       variant={
@@ -302,10 +308,9 @@ export function TripWizardScreen() {
         >
           {t('voyage.markReady')}
         </Button>
-      </Card>
+      </VoyageSheet>
 
-      {/* W3 — style */}
-      <Card>
+      <VoyageSheet>
         <StyleChoice
           currentStyle={trip.style}
           proposals={styleProposals}
@@ -316,42 +321,38 @@ export function TripWizardScreen() {
             );
           }}
         />
-      </Card>
+      </VoyageSheet>
 
-      {/* W3 — excursions */}
-      <Card>
-        <h3 className="font-semibold">{t('voyage.step.excursions')}</h3>
-        <Button
-          type="button"
-          className="mt-3"
-          onClick={() => void proposePois(trip.id)}
-        >
+      <VoyageSheet title={t('voyage.step.excursions')}>
+        <Button type="button" onClick={() => void proposePois(trip.id)}>
           {t('voyage.proposePois')}
         </Button>
-        <ul className="mt-4 flex flex-col gap-3">
+        <ul className="mt-4 flex list-none flex-col gap-0 p-0">
           {tripPois.map(p => {
             const myVote = votes.find(v => v.poiId === p.id)?.vote;
             return (
-              <li key={p.id}>
-                <Card>
-                  <p className="font-medium">{p.name}</p>
-                  <p className="text-muted text-xs">
-                    {p.zone} · {p.costBand} · {p.durationHours ?? '?'} h
-                  </p>
-                  <p className="mt-1 text-sm">{p.whyMatch}</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {(['interested', 'maybe', 'no'] as const).map(v => (
-                      <Button
-                        key={v}
-                        type="button"
-                        variant={myVote === v ? 'primary' : 'secondary'}
-                        onClick={() => void votePoi(p.id, v)}
-                      >
-                        {t(`voyage.vote.${v}`)}
-                      </Button>
-                    ))}
-                  </div>
-                </Card>
+              <li
+                key={p.id}
+                className="py-4"
+                style={{ borderBottom: '1px solid var(--voyage-ink-faint)' }}
+              >
+                <p className="m-0 font-medium">{p.name}</p>
+                <p className="text-muted text-xs">
+                  {p.zone} · {p.costBand} · {p.durationHours ?? '?'} h
+                </p>
+                <p className="mt-1 text-sm">{p.whyMatch}</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(['interested', 'maybe', 'no'] as const).map(v => (
+                    <Button
+                      key={v}
+                      type="button"
+                      variant={myVote === v ? 'primary' : 'secondary'}
+                      onClick={() => void votePoi(p.id, v)}
+                    >
+                      {t(`voyage.vote.${v}`)}
+                    </Button>
+                  ))}
+                </div>
               </li>
             );
           })}
@@ -364,12 +365,10 @@ export function TripWizardScreen() {
         >
           {t('voyage.markReady')}
         </Button>
-      </Card>
+      </VoyageSheet>
 
-      {/* W2 différé — schéma prêt, pas de génération */}
-      <Card>
-        <h3 className="font-semibold">{t('voyage.artifactsTitle')}</h3>
-        <p className="text-muted mt-2 text-sm">
+      <VoyageSheet title={t('voyage.artifactsTitle')}>
+        <p className="text-muted m-0 text-sm">
           {t('voyage.artifactsDeferred')}
         </p>
         <ul className="mt-2 list-inside list-disc text-sm">
@@ -377,18 +376,17 @@ export function TripWizardScreen() {
             <li key={a}>{a}</li>
           ))}
         </ul>
-      </Card>
+      </VoyageSheet>
 
-      <Card>
-        <h3 className="font-semibold">{t('voyage.decisions')}</h3>
-        <ul className="mt-2 flex flex-col gap-1 text-sm">
+      <VoyageSheet title={t('voyage.decisions')}>
+        <ul className="m-0 flex list-none flex-col gap-1 p-0 text-sm">
           {tripDecisions.slice(0, 20).map(d => (
             <li key={d.id}>
               <span className="text-muted">{d.stepKey}</span> — {d.summary}
             </li>
           ))}
         </ul>
-      </Card>
+      </VoyageSheet>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Users } from 'lucide-react';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
@@ -11,9 +10,10 @@ import { REPO_URL } from '../../app/links.ts';
 import { normalizeInviteCode } from '../../entities/invite-code.ts';
 import { useVoyage } from './store.ts';
 import { MeridianField } from './MeridianField.tsx';
+import { VoyageRule } from './VoyageSheet.tsx';
 
 /**
- * Accueil : le voyage est central. Le foyer est un accès secondaire (`/foyer`).
+ * Accueil carnet : marque, teaser foyer en filet, voyage en composition centrale.
  */
 export function HomeScreen() {
   const { t } = useI18n();
@@ -46,9 +46,10 @@ export function HomeScreen() {
     : 0;
   const currentTrip =
     householdTrips.find(tr => tr.isCurrent) ?? householdTrips[0];
+  const otherTrips = householdTrips.filter(tr => tr.id !== currentTrip?.id);
 
   return (
-    <div className="voyage-shell flex flex-col gap-8">
+    <div className="voyage-shell flex flex-col gap-6">
       <MeridianField />
 
       <header className="voyage-rise relative pt-2">
@@ -115,10 +116,7 @@ export function HomeScreen() {
               <Button type="submit" variant="secondary" disabled={busy}>
                 {t('voyage.acceptInvite')}
               </Button>
-              <Link
-                to="/rejoindre"
-                className="text-sm underline-offset-2 hover:underline"
-              >
+              <Link to="/rejoindre" className="voyage-ink-link text-sm">
                 {t('voyage.joinTitle')}
               </Link>
             </form>
@@ -130,36 +128,18 @@ export function HomeScreen() {
             to="/foyer"
             className="voyage-hh-teaser voyage-rise voyage-rise-delay-1"
           >
-            <span className="voyage-hh-teaser__icon" aria-hidden>
-              <Users size={18} strokeWidth={2} />
+            <span className="voyage-hh-teaser__name">
+              {currentHousehold.name}
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-medium">{currentHousehold.name}</span>
-              <span className="text-muted text-sm">
-                {memberCount} {t('voyage.members')} ·{' '}
-                {t('voyage.openHousehold')}
-              </span>
+            <span className="text-muted text-sm">
+              {memberCount} {t('voyage.members')} — {t('voyage.openHousehold')}
             </span>
-            <ChevronRight className="text-muted shrink-0" aria-hidden />
           </Link>
 
-          <section className="voyage-rise voyage-rise-delay-2 flex flex-col gap-4">
-            <div className="flex flex-wrap items-end justify-between gap-2">
-              <h2 className="voyage-brand m-0 text-3xl">{t('voyage.trips')}</h2>
-              {!showNewTrip && householdTrips.length > 0 ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setShowNewTrip(true)}
-                >
-                  {t('voyage.createTrip')}
-                </Button>
-              ) : null}
-            </div>
-
+          <section className="voyage-rise voyage-rise-delay-2">
             {householdTrips.length === 0 ? (
               <div className="voyage-trip-hero voyage-trip-hero--empty">
-                <p className="voyage-brand m-0 text-2xl">
+                <p className="voyage-brand m-0 text-2xl sm:text-3xl">
                   {t('voyage.noTripsHero')}
                 </p>
                 <p className="text-muted mt-2 max-w-prose text-sm">
@@ -183,75 +163,100 @@ export function HomeScreen() {
                 </form>
               </div>
             ) : (
-              <ul className="m-0 flex list-none flex-col gap-4 p-0">
-                {householdTrips.map((tr, i) => {
-                  const featured = tr.id === currentTrip?.id;
-                  return (
-                    <li
-                      key={tr.id}
-                      className={
-                        featured
-                          ? 'voyage-trip-hero voyage-trip-hero--featured'
-                          : 'voyage-trip-hero'
-                      }
-                      style={{ animationDelay: `${60 + i * 40}ms` }}
+              <>
+                {currentTrip ? (
+                  <article className="voyage-trip-hero">
+                    <Link
+                      to={`/voyage/${currentTrip.id}`}
+                      className="voyage-trip-hero__link"
                     >
-                      <Link
-                        to={`/voyage/${tr.id}`}
-                        className="voyage-trip-hero__link"
-                      >
-                        <span className="voyage-trip-hero__kicker">
-                          {featured
-                            ? t('voyage.currentTrip')
-                            : t('voyage.trips')}
-                        </span>
-                        <span className="voyage-trip-hero__title">
-                          {tr.title}
-                        </span>
-                        <span className="voyage-trip-hero__meta text-muted">
-                          {tr.destinationCountry || t('voyage.noDestination')}
-                          {tr.style !== 'undecided'
-                            ? ` · ${t(`voyage.styleLabel.${tr.style}`)}`
-                            : ''}
-                        </span>
-                        <span className="voyage-trip-hero__cta">
-                          {t('voyage.continueTrip')}
-                          <ChevronRight size={18} aria-hidden />
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+                      <span className="voyage-trip-hero__kicker">
+                        {t('voyage.currentTrip')}
+                      </span>
+                      <span className="voyage-trip-hero__title">
+                        {currentTrip.title}
+                      </span>
+                      <span className="voyage-trip-hero__meta">
+                        {currentTrip.destinationCountry ||
+                          t('voyage.noDestination')}
+                        {currentTrip.style !== 'undecided'
+                          ? ` · ${t(`voyage.styleLabel.${currentTrip.style}`)}`
+                          : ''}
+                      </span>
+                      <span className="voyage-trip-hero__cta">
+                        {t('voyage.continueTrip')}
+                      </span>
+                    </Link>
+                  </article>
+                ) : null}
 
-            {showNewTrip ? (
-              <form
-                className="voyage-member-add--open flex flex-wrap items-end gap-2"
-                onSubmit={e => {
-                  e.preventDefault();
-                  if (!tripTitle.trim()) return;
-                  void createTrip(currentHousehold.id, tripTitle.trim());
-                  setTripTitle('');
-                  setShowNewTrip(false);
-                }}
-              >
-                <TextField
-                  label={t('voyage.tripTitle')}
-                  value={tripTitle}
-                  onChange={e => setTripTitle(e.target.value)}
-                  autoFocus
-                />
-                <Button type="submit">{t('voyage.createTrip')}</Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setShowNewTrip(false)}
-                >
-                  {t('voyage.cancelEdit')}
-                </Button>
-              </form>
-            ) : null}
+                {otherTrips.length > 0 ? (
+                  <ul className="m-0 mt-2 flex list-none flex-col p-0">
+                    {otherTrips.map(tr => (
+                      <li
+                        key={tr.id}
+                        className="voyage-trip-hero voyage-trip-hero--secondary"
+                      >
+                        <Link
+                          to={`/voyage/${tr.id}`}
+                          className="voyage-trip-hero__link"
+                        >
+                          <span
+                            className="voyage-trip-hero__title"
+                            style={{ fontSize: '1.35rem' }}
+                          >
+                            {tr.title}
+                          </span>
+                          <span className="voyage-trip-hero__meta">
+                            {tr.destinationCountry || t('voyage.noDestination')}
+                            {tr.style !== 'undecided'
+                              ? ` · ${t(`voyage.styleLabel.${tr.style}`)}`
+                              : ''}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+
+                <VoyageRule className="mt-4" />
+                {!showNewTrip ? (
+                  <button
+                    type="button"
+                    className="voyage-ink-btn mt-3"
+                    onClick={() => setShowNewTrip(true)}
+                  >
+                    {t('voyage.createTrip')}
+                  </button>
+                ) : (
+                  <form
+                    className="voyage-member-add--open mt-3 flex flex-wrap items-end gap-2"
+                    onSubmit={e => {
+                      e.preventDefault();
+                      if (!tripTitle.trim()) return;
+                      void createTrip(currentHousehold.id, tripTitle.trim());
+                      setTripTitle('');
+                      setShowNewTrip(false);
+                    }}
+                  >
+                    <TextField
+                      label={t('voyage.tripTitle')}
+                      value={tripTitle}
+                      onChange={e => setTripTitle(e.target.value)}
+                      autoFocus
+                    />
+                    <Button type="submit">{t('voyage.createTrip')}</Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setShowNewTrip(false)}
+                    >
+                      {t('voyage.cancelEdit')}
+                    </Button>
+                  </form>
+                )}
+              </>
+            )}
           </section>
         </>
       )}

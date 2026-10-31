@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
-import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { useI18n } from '../../i18n/index.ts';
 import { normalizeInviteCode } from '../../entities/invite-code.ts';
 import { useVoyage } from './store.ts';
+import { VoyageSheet } from './VoyageSheet.tsx';
 
 /**
  * Rejoindre un foyer via code court (lien profond `/rejoindre/:code` ou saisie).
@@ -72,11 +72,7 @@ export function JoinScreen() {
   }, [routeCode, acceptInvite, navigate, t]);
 
   return (
-    <Card>
-      <CardHeader
-        title={t('voyage.joinTitle')}
-        subtitle={t('voyage.joinHint')}
-      />
+    <VoyageSheet title={t('voyage.joinTitle')} lead={t('voyage.joinHint')}>
       <form
         className="flex flex-col gap-3"
         onSubmit={e => {
@@ -103,10 +99,10 @@ export function JoinScreen() {
         >
           {t('voyage.acceptInvite')}
         </Button>
-        <Link to="/" className="text-sm underline-offset-2 hover:underline">
+        <Link to="/" className="voyage-ink-link text-sm">
           {t('voyage.backHome')}
         </Link>
       </form>
-    </Card>
+    </VoyageSheet>
   );
 }

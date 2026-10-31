@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
-import { Card } from '@mister-guiiug/dev-pwa-config/react/card';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
 import { SkeletonGroup } from '@mister-guiiug/dev-pwa-config/react/skeleton';
@@ -10,11 +9,9 @@ import { useVoyage } from './store.ts';
 import { InviteShare } from './InviteShare.tsx';
 import { FamilyMembersPanel } from './FamilyMembersPanel.tsx';
 import { MeridianField } from './MeridianField.tsx';
+import { VoyageSheet } from './VoyageSheet.tsx';
 
-/**
- * Menu dédié du foyer : nom éditable, membres, invitation.
- * L’accueil ne porte plus que le voyage ; le profil familial vit ici.
- */
+/** Menu foyer — page de carnet : nom éditable, voyageurs, invitation. */
 export function HouseholdScreen() {
   const { t } = useI18n();
   const ready = useVoyage(s => s.ready);
@@ -86,7 +83,7 @@ export function HouseholdScreen() {
           </form>
           <Link
             to="/rejoindre"
-            className="mt-4 inline-block text-sm underline-offset-2 hover:underline"
+            className="voyage-ink-link mt-4 inline-block text-sm"
           >
             {t('voyage.joinTitle')}
           </Link>
@@ -96,12 +93,10 @@ export function HouseholdScreen() {
   }
 
   return (
-    <div className="voyage-shell flex flex-col gap-6">
+    <div className="voyage-shell flex flex-col gap-2">
       <MeridianField />
-      <header className="voyage-rise relative pt-1">
-        <p className="text-muted m-0 text-xs tracking-[0.14em] uppercase">
-          {t('voyage.householdMenu')}
-        </p>
+      <header className="voyage-rise relative pt-1 pb-2">
+        <p className="text-muted m-0 text-sm">{t('voyage.householdMenu')}</p>
         {editingName ? (
           <form
             className="mt-2 flex flex-wrap items-end gap-2"
@@ -139,7 +134,7 @@ export function HouseholdScreen() {
             </h2>
             <button
               type="button"
-              className="text-muted text-sm underline-offset-2 hover:underline"
+              className="voyage-ink-btn text-sm"
               onClick={() => setEditingName(true)}
             >
               {t('voyage.editHouseholdName')}
@@ -151,61 +146,59 @@ export function HouseholdScreen() {
         </p>
       </header>
 
-      <Card className="voyage-rise voyage-rise-delay-1">
-        <h3 className="m-0 text-base font-semibold">
-          {t('voyage.membersTitle')}
-        </h3>
-        <div className="mt-4">
-          <FamilyMembersPanel
-            members={householdMembers}
-            ticketOn={ticketOn}
-            onAdd={input => {
-              void addMember(current.id, input.displayName, {
-                birthDate: input.birthDate,
-                gender: input.gender,
-                interests: input.interests,
-              });
-            }}
-            onUpdate={(id, patch) => {
-              void updateMember(id, patch);
-            }}
-            inviteSlot={
-              <>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={busy}
-                    onClick={() => {
-                      setBusy(true);
-                      void createInvite(current.id)
-                        .then(inv =>
-                          setLastInvite({
-                            code: inv.code,
-                            expiresAt: inv.expiresAt,
-                          })
-                        )
-                        .finally(() => setBusy(false));
-                    }}
-                  >
-                    {t('voyage.createInvite')}
-                  </Button>
-                </div>
-                {lastInvite ? (
-                  <InviteShare
-                    code={lastInvite.code}
-                    expiresAt={lastInvite.expiresAt}
-                    onClose={() => setLastInvite(null)}
-                  />
-                ) : null}
-              </>
-            }
-          />
-        </div>
-      </Card>
+      <VoyageSheet
+        title={t('voyage.membersTitle')}
+        className="voyage-rise voyage-rise-delay-1"
+      >
+        <FamilyMembersPanel
+          members={householdMembers}
+          ticketOn={ticketOn}
+          onAdd={input => {
+            void addMember(current.id, input.displayName, {
+              birthDate: input.birthDate,
+              gender: input.gender,
+              interests: input.interests,
+            });
+          }}
+          onUpdate={(id, patch) => {
+            void updateMember(id, patch);
+          }}
+          inviteSlot={
+            <>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  className="voyage-ink-btn"
+                  disabled={busy}
+                  onClick={() => {
+                    setBusy(true);
+                    void createInvite(current.id)
+                      .then(inv =>
+                        setLastInvite({
+                          code: inv.code,
+                          expiresAt: inv.expiresAt,
+                        })
+                      )
+                      .finally(() => setBusy(false));
+                  }}
+                >
+                  {t('voyage.createInvite')}
+                </button>
+              </div>
+              {lastInvite ? (
+                <InviteShare
+                  code={lastInvite.code}
+                  expiresAt={lastInvite.expiresAt}
+                  onClose={() => setLastInvite(null)}
+                />
+              ) : null}
+            </>
+          }
+        />
+      </VoyageSheet>
 
-      <p className="voyage-rise voyage-rise-delay-2 text-sm">
-        <Link to="/" className="underline-offset-2 hover:underline">
+      <p className="voyage-rise voyage-rise-delay-2 py-4 text-sm">
+        <Link to="/" className="voyage-ink-link">
           {t('voyage.backToTrips')}
         </Link>
       </p>
