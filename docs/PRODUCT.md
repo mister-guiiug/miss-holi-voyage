@@ -1,9 +1,10 @@
 # Miss Holi Voyage — produit
 
 Agent PWA multi-foyers d’aide à la préparation de voyage. MVP = **W1** (profil
-+ destination + questions IA) et **W3** (dates/vols, hub vs roadtrip,
-préselection d’excursions). Les artefacts pays (**W2**) sont stockables mais
-non générés en v1.
+
+- destination + questions IA) et **W3** (dates/vols, hub vs roadtrip,
+  préselection d’excursions). Les artefacts pays (**W2**) sont stockables mais
+  non générés en v1.
 
 ## Job to be done
 

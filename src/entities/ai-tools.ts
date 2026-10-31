@@ -36,7 +36,8 @@ export function suggestSpecQuestions(ctx: SpecContext): SpecQuestion[] {
   if (!trip.dateWindowStart || !trip.dateWindowEnd) {
     out.push({
       tripId: trip.id,
-      prompt: 'Quelle fenêtre de dates est réaliste (congés / vacances scolaires) ?',
+      prompt:
+        'Quelle fenêtre de dates est réaliste (congés / vacances scolaires) ?',
       rationale: 'Borne les options de vol et la saison des excursions.',
       priority: 9,
       answer: '',
@@ -46,7 +47,8 @@ export function suggestSpecQuestions(ctx: SpecContext): SpecQuestion[] {
   if (trip.budgetCeiling == null) {
     out.push({
       tripId: trip.id,
-      prompt: 'Quel plafond budgétaire pour le transport + activités (hors hébergement) ?',
+      prompt:
+        'Quel plafond budgétaire pour le transport + activités (hors hébergement) ?',
       rationale: 'Filtre le style hub/roadtrip et le coût des POI.',
       priority: 8,
       answer: '',
@@ -56,7 +58,8 @@ export function suggestSpecQuestions(ctx: SpecContext): SpecQuestion[] {
   if (hasKids) {
     out.push({
       tripId: trip.id,
-      prompt: 'Quel rythme quotidien pour les enfants (siestes, horaires, durée max d’activité) ?',
+      prompt:
+        'Quel rythme quotidien pour les enfants (siestes, horaires, durée max d’activité) ?',
       rationale: 'Écarte les journées trop longues et les POI peu adaptés.',
       priority: 8,
       answer: '',
@@ -76,7 +79,8 @@ export function suggestSpecQuestions(ctx: SpecContext): SpecQuestion[] {
   if (trip.style === 'undecided') {
     out.push({
       tripId: trip.id,
-      prompt: 'Préférez-vous une base fixe (hub) ou un enchaînement de lieux (roadtrip) ?',
+      prompt:
+        'Préférez-vous une base fixe (hub) ou un enchaînement de lieux (roadtrip) ?',
       rationale: 'Change l’aéroport d’arrivée et la shortlist d’excursions.',
       priority: 7,
       answer: '',
@@ -85,7 +89,8 @@ export function suggestSpecQuestions(ctx: SpecContext): SpecQuestion[] {
   }
   out.push({
     tripId: trip.id,
-    prompt: 'Quels intérêts doivent primer (nature, culture, plage, sport, gastronomie) ?',
+    prompt:
+      'Quels intérêts doivent primer (nature, culture, plage, sport, gastronomie) ?',
     rationale: 'Ordonne les propositions de sites.',
     priority: 5,
     answer: '',
@@ -93,7 +98,8 @@ export function suggestSpecQuestions(ctx: SpecContext): SpecQuestion[] {
   });
   out.push({
     tripId: trip.id,
-    prompt: 'Acceptez-vous des escales, ou un vol direct est-il non négociable ?',
+    prompt:
+      'Acceptez-vous des escales, ou un vol direct est-il non négociable ?',
     rationale: 'Réduit le tableau comparatif des billets.',
     priority: 6,
     answer: '',
@@ -178,7 +184,8 @@ export function proposePois(ctx: SpecContext): PoiCandidate[] {
       minAge: null,
       seasonNotes: 'Matin en semaine.',
       costBand: 'low',
-      whyMatch: 'Repères monnaie / nourriture / mots utiles (lien futur Miss Devises).',
+      whyMatch:
+        'Repères monnaie / nourriture / mots utiles (lien futur Miss Devises).',
       source: 'ai',
     },
     {
@@ -192,7 +199,10 @@ export function proposePois(ctx: SpecContext): PoiCandidate[] {
       source: 'ai',
     },
     {
-      name: style === 'roadtrip' ? `Étape paysage route — ${country}` : `Excursion journée hors hub — ${zone}`,
+      name:
+        style === 'roadtrip'
+          ? `Étape paysage route — ${country}`
+          : `Excursion journée hors hub — ${zone}`,
       zone,
       durationHours: style === 'roadtrip' ? 5 : 7,
       minAge: hasKids ? 5 : null,

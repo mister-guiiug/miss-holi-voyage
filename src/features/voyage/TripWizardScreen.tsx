@@ -63,17 +63,14 @@ export function TripWizardScreen() {
     setRegion(trip.destinationRegion);
     setDateStart(trip.dateWindowStart ?? '');
     setDateEnd(trip.dateWindowEnd ?? '');
-    setBudget(
-      trip.budgetCeiling != null ? String(trip.budgetCeiling) : ''
-    );
+    setBudget(trip.budgetCeiling != null ? String(trip.budgetCeiling) : '');
   }, [trip]);
 
   if (!ready) return <SkeletonGroup label={t('voyage.trips')} lines={4} />;
   if (!trip) {
     return (
       <p>
-        {t('voyage.tripMissing')}{' '}
-        <Link to="/">{t('voyage.backHome')}</Link>
+        {t('voyage.tripMissing')} <Link to="/">{t('voyage.backHome')}</Link>
       </p>
     );
   }
@@ -118,9 +115,7 @@ export function TripWizardScreen() {
                 void updateTrip(trip.id, {
                   destinationCountry: country.trim(),
                   destinationRegion: region.trim(),
-                }).then(() =>
-                  setStepStatus(trip.id, 'destination', 'ready')
-                );
+                }).then(() => setStepStatus(trip.id, 'destination', 'ready'));
               }}
             >
               {t('voyage.markReady')}
@@ -128,7 +123,9 @@ export function TripWizardScreen() {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => void setStepStatus(trip.id, 'destination', 'locked')}
+              onClick={() =>
+                void setStepStatus(trip.id, 'destination', 'locked')
+              }
             >
               {t('voyage.lock')}
             </Button>
@@ -394,7 +391,9 @@ export function TripWizardScreen() {
       {/* W2 différé — schéma prêt, pas de génération */}
       <Card>
         <h3 className="font-semibold">{t('voyage.artifactsTitle')}</h3>
-        <p className="text-muted mt-2 text-sm">{t('voyage.artifactsDeferred')}</p>
+        <p className="text-muted mt-2 text-sm">
+          {t('voyage.artifactsDeferred')}
+        </p>
         <ul className="mt-2 list-inside list-disc text-sm">
           {ARTIFACT_TYPES_W2.map(a => (
             <li key={a}>{a}</li>

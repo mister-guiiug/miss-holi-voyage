@@ -23,7 +23,9 @@ export type { VoyageSnapshot, StyleProposal };
 export interface VoyageRepository {
   load(): Promise<VoyageSnapshot>;
   createHousehold(name: string, notes?: string): Promise<Household>;
-  createInvite(householdId: string): Promise<{ token: string; expiresAt: string }>;
+  createInvite(
+    householdId: string
+  ): Promise<{ token: string; expiresAt: string }>;
   acceptInvite(token: string): Promise<string>;
   addMember(
     member: Omit<HouseholdMember, 'id'> & { id?: string }

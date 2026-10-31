@@ -124,7 +124,11 @@ export function createLocalVoyage(): VoyageRepository {
       const snap = voyageStore.load();
       const inv = snap.inviteTokens.find(i => i.token === token);
       if (!inv) throw new Error('invitation inconnue');
-      if (!snap.memberships.some(m => m.householdId === inv.householdId && m.userId === LOCAL_USER)) {
+      if (
+        !snap.memberships.some(
+          m => m.householdId === inv.householdId && m.userId === LOCAL_USER
+        )
+      ) {
         voyageStore.save({
           ...snap,
           memberships: [
@@ -216,7 +220,9 @@ export function createLocalVoyage(): VoyageRepository {
       const snap = voyageStore.load();
       const trip = snap.trips.find(t => t.id === tripId);
       if (!trip) throw new Error('voyage introuvable');
-      const members = snap.members.filter(m => m.householdId === trip.householdId);
+      const members = snap.members.filter(
+        m => m.householdId === trip.householdId
+      );
       const generated = suggestSpecQuestions({ trip, members });
       const withoutOpen = snap.questions.filter(
         q => !(q.tripId === tripId && q.status === 'open')
@@ -233,9 +239,7 @@ export function createLocalVoyage(): VoyageRepository {
       voyageStore.save({
         ...snap,
         questions: snap.questions.map(q =>
-          q.id === questionId
-            ? { ...q, answer, status }
-            : q
+          q.id === questionId ? { ...q, answer, status } : q
         ),
       });
     },
@@ -274,7 +278,9 @@ export function createLocalVoyage(): VoyageRepository {
       const snap = voyageStore.load();
       const trip = snap.trips.find(t => t.id === tripId);
       if (!trip) throw new Error('voyage introuvable');
-      const members = snap.members.filter(m => m.householdId === trip.householdId);
+      const members = snap.members.filter(
+        m => m.householdId === trip.householdId
+      );
       return proposeItineraryStyle({ trip, members });
     },
 
@@ -296,7 +302,9 @@ export function createLocalVoyage(): VoyageRepository {
       const snap = voyageStore.load();
       const trip = snap.trips.find(t => t.id === tripId);
       if (!trip) throw new Error('voyage introuvable');
-      const members = snap.members.filter(m => m.householdId === trip.householdId);
+      const members = snap.members.filter(
+        m => m.householdId === trip.householdId
+      );
       const generated = proposePois({ trip, members });
       voyageStore.save({
         ...snap,

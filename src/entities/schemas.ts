@@ -24,13 +24,7 @@ export const ageBandSchema = z.enum([
   'adult',
   'senior',
 ]);
-export const costBandSchema = z.enum([
-  'free',
-  'low',
-  'mid',
-  'high',
-  'unknown',
-]);
+export const costBandSchema = z.enum(['free', 'low', 'mid', 'high', 'unknown']);
 
 export const householdSchema = z.object({
   id: z.string().min(1),
