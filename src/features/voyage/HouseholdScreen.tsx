@@ -57,7 +57,7 @@ export function HouseholdScreen() {
   if (!current) {
     return (
       <div className="voyage-shell flex flex-col gap-6">
-          <VoyageAtmosphere />
+        <VoyageAtmosphere />
         <EmptyState
           title={t('voyage.noHousehold')}
           description={t('voyage.noHouseholdHint')}
