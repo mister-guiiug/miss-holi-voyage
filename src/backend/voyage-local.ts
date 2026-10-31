@@ -150,6 +150,7 @@ export function createLocalVoyage(): VoyageRepository {
       const row: HouseholdMember = {
         ...member,
         id: createId('mem'),
+        birthDate: member.birthDate ?? null,
         interests: member.interests ?? [],
         ageBand: member.ageBand ?? 'adult',
         mobilityNotes: member.mobilityNotes ?? '',
@@ -158,6 +159,18 @@ export function createLocalVoyage(): VoyageRepository {
         position: member.position ?? snap.members.length,
       };
       voyageStore.save({ ...snap, members: [...snap.members, row] });
+      return row;
+    },
+
+    async updateMember(memberId, patch) {
+      const snap = voyageStore.load();
+      const idx = snap.members.findIndex(m => m.id === memberId);
+      if (idx < 0) throw new Error(`membre inconnu: ${memberId}`);
+      const prev = snap.members[idx]!;
+      const row: HouseholdMember = { ...prev, ...patch };
+      const members = snap.members.slice();
+      members[idx] = row;
+      voyageStore.save({ ...snap, members });
       return row;
     },
 

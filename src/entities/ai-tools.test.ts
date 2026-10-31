@@ -29,6 +29,7 @@ const member = (patch: Partial<HouseholdMember> = {}): HouseholdMember => ({
   id: 'mem_1',
   householdId: 'hh_1',
   displayName: 'Lou',
+  birthDate: null,
   ageBand: 'child',
   mobilityNotes: '',
   foodNotes: '',

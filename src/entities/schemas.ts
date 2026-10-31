@@ -39,6 +39,13 @@ export const householdMemberSchema = z.object({
   id: z.string().min(1),
   householdId: z.string().min(1),
   displayName: z.string().min(1).max(80),
+  /** ISO `YYYY-MM-DD` — source de vérité pour billetterie avion / excursions. */
+  birthDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .default(null),
+  /** Libellé UX ; recalculé depuis `birthDate` quand elle est connue. */
   ageBand: ageBandSchema.default('adult'),
   mobilityNotes: z.string().max(500).default(''),
   foodNotes: z.string().max(500).default(''),

@@ -6,6 +6,7 @@ import {
   type VoyageSnapshot,
 } from '../../entities/schemas.ts';
 import type { StyleProposal } from '../../entities/ai-tools.ts';
+import { ageBandFromBirthDate } from '../../entities/ticket-age.ts';
 
 const log = createLogger('voyage');
 
@@ -20,7 +21,15 @@ type VoyageState = VoyageSnapshot & {
   addMember: (
     householdId: string,
     displayName: string,
-    ageBand?: string
+    opts?: { ageBand?: string; birthDate?: string | null }
+  ) => Promise<void>;
+  updateMember: (
+    memberId: string,
+    patch: {
+      displayName?: string;
+      birthDate?: string | null;
+      ageBand?: 'infant' | 'child' | 'teen' | 'adult' | 'senior';
+    }
   ) => Promise<void>;
   createTrip: (householdId: string, title: string) => Promise<string>;
   updateTrip: (
@@ -95,17 +104,31 @@ export const useVoyage = create<VoyageState>((set, get) => ({
     await refresh(set);
   },
 
-  addMember: async (householdId, displayName, ageBand = 'adult') => {
+  addMember: async (householdId, displayName, opts = {}) => {
+    const birthDate = opts.birthDate ?? null;
+    const ageBand = birthDate
+      ? ageBandFromBirthDate(birthDate)
+      : ((opts.ageBand as 'adult') ?? 'adult');
     await backend.voyage.addMember({
       householdId,
       displayName,
-      ageBand: ageBand as 'adult',
+      birthDate,
+      ageBand,
       mobilityNotes: '',
       foodNotes: '',
       sleepNotes: '',
       interests: [],
       position: get().members.length,
     });
+    await refresh(set);
+  },
+
+  updateMember: async (memberId, patch) => {
+    const next = { ...patch };
+    if (patch.birthDate) {
+      next.ageBand = ageBandFromBirthDate(patch.birthDate);
+    }
+    await backend.voyage.updateMember(memberId, next);
     await refresh(set);
   },
 
