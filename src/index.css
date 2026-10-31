@@ -1494,13 +1494,70 @@ html[data-voyage-theme='album'] .voyage-dates__field {
   border-radius: var(--radius-card);
   background: var(--dwc-surface);
   color: inherit;
+}
+
+.voyage-destination__card:hover {
+  border-color: var(--voyage-accent);
+}
+
+.voyage-destination__card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
   text-align: left;
   font: inherit;
   cursor: pointer;
 }
 
-.voyage-destination__card:hover {
-  border-color: var(--voyage-accent);
+.voyage-destination__chosen {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--voyage-ink-faint);
+  border-radius: var(--radius-card);
+  background: var(--dwc-surface);
+}
+
+.voyage-destination__chosen-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.voyage-destination__chosen-text {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.voyage-destination__chosen-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--dwc-text-soft);
+}
+
+.voyage-destination__chosen-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.voyage-destination__region-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.voyage-destination__region-pick-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dwc-text-soft);
 }
 
 .voyage-destination__card-head {
@@ -1560,6 +1617,24 @@ html[data-voyage-theme='album'] .voyage-dates__field {
   border-radius: 999px;
   background: color-mix(in srgb, var(--voyage-accent) 12%, transparent);
   font-size: 0.78rem;
+}
+
+.voyage-destination__pill--action {
+  margin: 0;
+  border: 1px solid transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.voyage-destination__pill--action:hover {
+  border-color: var(--voyage-accent);
+}
+
+.voyage-destination__pill--action.is-selected {
+  border-color: var(--voyage-accent);
+  background: color-mix(in srgb, var(--voyage-accent) 28%, transparent);
+  font-weight: 600;
 }
 
 .voyage-destination__empty {
