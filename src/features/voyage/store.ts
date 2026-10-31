@@ -7,6 +7,10 @@ import {
 } from '../../entities/schemas.ts';
 import type { StyleProposal } from '../../entities/ai-tools.ts';
 import { ageBandFromBirthDate } from '../../entities/ticket-age.ts';
+import type {
+  MemberGender,
+  MemberInterestId,
+} from '../../entities/member-profile.ts';
 
 const log = createLogger('voyage');
 
@@ -23,7 +27,12 @@ type VoyageState = VoyageSnapshot & {
   addMember: (
     householdId: string,
     displayName: string,
-    opts?: { ageBand?: string; birthDate?: string | null }
+    opts?: {
+      ageBand?: string;
+      birthDate?: string | null;
+      gender?: MemberGender;
+      interests?: MemberInterestId[];
+    }
   ) => Promise<void>;
   updateMember: (
     memberId: string,
@@ -31,6 +40,8 @@ type VoyageState = VoyageSnapshot & {
       displayName?: string;
       birthDate?: string | null;
       ageBand?: 'infant' | 'child' | 'teen' | 'adult' | 'senior';
+      gender?: MemberGender;
+      interests?: MemberInterestId[];
     }
   ) => Promise<void>;
   createTrip: (householdId: string, title: string) => Promise<string>;
@@ -116,10 +127,11 @@ export const useVoyage = create<VoyageState>((set, get) => ({
       displayName,
       birthDate,
       ageBand,
+      gender: opts.gender ?? 'unspecified',
       mobilityNotes: '',
       foodNotes: '',
       sleepNotes: '',
-      interests: [],
+      interests: opts.interests ?? [],
       position: get().members.length,
     });
     await refresh(set);

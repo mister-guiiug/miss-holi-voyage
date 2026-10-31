@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import {
+  memberGenderSchema,
+  memberInterestIdSchema,
+} from './member-profile.ts';
+
+export type { MemberGender, MemberInterestId } from './member-profile.ts';
 
 export const householdRoleSchema = z.enum(['owner', 'editor', 'viewer']);
 export type HouseholdRole = z.infer<typeof householdRoleSchema>;
@@ -24,6 +30,7 @@ export const ageBandSchema = z.enum([
   'adult',
   'senior',
 ]);
+export type AgeBand = z.infer<typeof ageBandSchema>;
 export const costBandSchema = z.enum(['free', 'low', 'mid', 'high', 'unknown']);
 
 export const householdSchema = z.object({
@@ -47,10 +54,13 @@ export const householdMemberSchema = z.object({
     .default(null),
   /** Libellé UX ; recalculé depuis `birthDate` quand elle est connue. */
   ageBand: ageBandSchema.default('adult'),
+  /** Sexe pour avatar et ton du profil ; `unspecified` si non renseigné. */
+  gender: memberGenderSchema.default('unspecified'),
   mobilityNotes: z.string().max(500).default(''),
   foodNotes: z.string().max(500).default(''),
   sleepNotes: z.string().max(500).default(''),
-  interests: z.array(z.string()).default([]),
+  /** Centres d’intérêt (`member-profile`) — max 4 côté UX. */
+  interests: z.array(z.union([memberInterestIdSchema, z.string()])).default([]),
   position: z.number().int().default(0),
 });
 export type HouseholdMember = z.infer<typeof householdMemberSchema>;

@@ -78,6 +78,27 @@ def create_household(name: str, notes: str = "") -> dict[str, Any]:
     return hh
 
 
+_GENDERS = frozenset({"female", "male", "other", "unspecified"})
+_INTERESTS = frozenset(
+    {
+        "detente",
+        "culturel",
+        "nature",
+        "gastronomie",
+        "randonnee",
+        "plongee",
+        "familial",
+        "baroudeur",
+        "photographe",
+        "sportif",
+        "festivalier",
+        "romantique",
+        "lent",
+    }
+)
+_MAX_INTERESTS = 4
+
+
 def upsert_member(
     household_id: str,
     *,
@@ -85,6 +106,8 @@ def upsert_member(
     display_name: str,
     birth_date: str | None = None,
     age_band: str | None = None,
+    gender: str | None = None,
+    interests: list[str] | None = None,
 ) -> dict[str, Any]:
     snap = load()
     if not any(h["id"] == household_id for h in snap["households"]):
@@ -93,6 +116,11 @@ def upsert_member(
     band = age_band or "adult"
     if birth_date:
         band = age_band_from_birth(birth_date)
+
+    sex = gender if gender in _GENDERS else None
+    tags: list[str] | None = None
+    if interests is not None:
+        tags = [i for i in interests if i in _INTERESTS][:_MAX_INTERESTS]
 
     if member_id:
         for i, m in enumerate(snap["members"]):
@@ -103,6 +131,10 @@ def upsert_member(
                     "birthDate": birth_date,
                     "ageBand": band,
                 }
+                if sex is not None:
+                    row["gender"] = sex
+                if tags is not None:
+                    row["interests"] = tags
                 snap["members"][i] = row
                 save(snap)
                 return row
@@ -114,10 +146,11 @@ def upsert_member(
         "displayName": display_name,
         "birthDate": birth_date,
         "ageBand": band,
+        "gender": sex or "unspecified",
         "mobilityNotes": "",
         "foodNotes": "",
         "sleepNotes": "",
-        "interests": [],
+        "interests": tags or [],
         "position": len(
             [m for m in snap["members"] if m["householdId"] == household_id]
         ),

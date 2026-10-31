@@ -111,8 +111,22 @@ def upsert_voyageur(
         str | None,
         Field(description="infant|child|teen|adult|senior si pas de birth_date"),
     ] = None,
+    gender: Annotated[
+        str | None,
+        Field(description="female|male|other|unspecified"),
+    ] = None,
+    interests: Annotated[
+        list[str] | None,
+        Field(
+            description=(
+                "Centres d’intérêt (max 4) : detente, culturel, nature, "
+                "gastronomie, randonnee, plongee, familial, baroudeur, "
+                "photographe, sportif, festivalier, romantique, lent"
+            )
+        ),
+    ] = None,
 ) -> dict[str, Any]:
-    """Profil voyageur : adulte / ado / enfant / bébé via naissance ou tranche."""
+    """Profil voyageur : naissance, sexe, centres d’intérêt (détente / culturel / nature…)."""
     try:
         return store.upsert_member(
             household_id,
@@ -120,6 +134,8 @@ def upsert_voyageur(
             display_name=display_name,
             birth_date=birth_date,
             age_band=age_band,
+            gender=gender,
+            interests=interests,
         )
     except ValueError as exc:
         raise ToolError(str(exc)) from exc

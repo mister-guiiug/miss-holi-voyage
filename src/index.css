@@ -218,3 +218,137 @@ body {
       max(env(safe-area-inset-bottom), 0px)
   );
 }
+
+/* —— Profil famille : pastilles sexe / intérêts + cartes voyageur —— */
+
+.voyage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--dwc-border-strong);
+  border-radius: 999px;
+  background: var(--dwc-surface);
+  color: var(--dwc-text);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.voyage-chip--on {
+  border-color: var(--voyage-accent);
+  background: var(--dwc-primary-soft);
+  color: var(--dwc-text);
+}
+
+.voyage-chip--soft {
+  cursor: default;
+  border-color: var(--dwc-border);
+  background: var(--dwc-surface-2);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.65rem;
+}
+
+.voyage-member__open {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.voyage-member__open:hover .font-medium,
+.voyage-member__open:focus-visible .font-medium {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.voyage-member__avatar {
+  filter: drop-shadow(
+    0 2px 6px color-mix(in oklab, var(--voyage-glow) 35%, transparent)
+  );
+}
+
+.voyage-interests__legend {
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.voyage-interests__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.65rem;
+}
+
+.voyage-interest {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0.75rem 0.8rem;
+  border: 1px solid var(--dwc-border);
+  border-radius: var(--radius-card);
+  background: var(--dwc-surface);
+  color: var(--dwc-text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.voyage-interest:hover:not(:disabled) {
+  border-color: var(--dwc-border-strong);
+}
+
+.voyage-interest:focus-visible {
+  outline: 2px solid var(--voyage-accent);
+  outline-offset: 2px;
+}
+
+.voyage-interest--on {
+  border-color: var(--voyage-accent);
+  background: color-mix(
+    in oklab,
+    var(--dwc-primary-soft) 80%,
+    var(--dwc-surface)
+  );
+  box-shadow: inset 0 0 0 1px var(--voyage-accent);
+}
+
+.voyage-interest:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.voyage-interest__emoji {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.voyage-interest__label {
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.voyage-interest__desc {
+  font-size: 0.7rem;
+  line-height: 1.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voyage-chip,
+  .voyage-interest {
+    transition: none;
+  }
+}

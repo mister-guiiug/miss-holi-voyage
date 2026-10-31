@@ -32,6 +32,7 @@ personne à la rediscuter.
 | [0011](./0011-mesure-audience.md)               | Une propriété GA4 pour le parc, l'application en dimension       |
 | [0012](./0012-posthog-en-europe.md)             | PostHog en Europe remplace GA4 — l'outil, pas la forme           |
 | [0013](./0013-mcp-voyage-et-partir.md)          | MCP voyage (écriture) + destinations partir.com sans scrape      |
+| [0014](./0014-profil-voyageur-sexe-interets.md) | Sexe + centres d’intérêt (max 4) sur le profil voyageur          |
 
 ## Quand une application s'écarte
 
