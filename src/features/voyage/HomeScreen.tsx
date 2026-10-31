@@ -8,6 +8,10 @@ import { SkeletonGroup } from '@mister-guiiug/dev-pwa-config/react/skeleton';
 import { AppFooter } from '@mister-guiiug/dev-pwa-config/react/app-footer';
 import { useI18n } from '../../i18n/index.ts';
 import { REPO_URL } from '../../app/links.ts';
+import {
+  excursionTicketClass,
+  flightTicketClass,
+} from '../../entities/ticket-age.ts';
 import { useVoyage } from './store.ts';
 import { MeridianField } from './MeridianField.tsx';
 
@@ -26,10 +30,14 @@ export function HomeScreen() {
   const createInvite = useVoyage(s => s.createInvite);
   const acceptInvite = useVoyage(s => s.acceptInvite);
   const addMember = useVoyage(s => s.addMember);
+  const updateMember = useVoyage(s => s.updateMember);
   const createTrip = useVoyage(s => s.createTrip);
 
   const [hhName, setHhName] = useState('');
   const [memberName, setMemberName] = useState('');
+  const [memberBirth, setMemberBirth] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editBirth, setEditBirth] = useState('');
   const [tripTitle, setTripTitle] = useState('');
   const [inviteToken, setInviteToken] = useState('');
   const [lastInvite, setLastInvite] = useState('');
@@ -46,6 +54,8 @@ export function HomeScreen() {
   const householdMembers = currentHousehold
     ? members.filter(m => m.householdId === currentHousehold.id)
     : [];
+  const ticketOn =
+    householdTrips[0]?.dateWindowStart ?? new Date().toISOString().slice(0, 10);
 
   return (
     <div className="voyage-shell flex flex-col gap-8">
@@ -118,27 +128,87 @@ export function HomeScreen() {
               <p className="text-muted mt-1 text-sm">
                 {householdMembers.length} {t('voyage.members')}
               </p>
-              <ul className="mt-3 flex flex-col gap-1 text-sm">
-                {householdMembers.map(m => (
-                  <li key={m.id}>
-                    {m.displayName}{' '}
-                    <span className="text-muted">({m.ageBand})</span>
-                  </li>
-                ))}
+              <ul className="mt-3 flex flex-col gap-3 text-sm">
+                {householdMembers.map(m => {
+                  const flight = flightTicketClass(
+                    m.birthDate,
+                    ticketOn,
+                    m.ageBand
+                  );
+                  const excursion = excursionTicketClass(
+                    m.birthDate,
+                    ticketOn,
+                    m.ageBand
+                  );
+                  const open = editingId === m.id;
+                  return (
+                    <li key={m.id} className="border-border border-b pb-3">
+                      <button
+                        type="button"
+                        className="text-left font-medium underline-offset-2 hover:underline"
+                        onClick={() => {
+                          setEditingId(open ? null : m.id);
+                          setEditBirth(m.birthDate ?? '');
+                        }}
+                      >
+                        {m.displayName}{' '}
+                        <span className="text-muted font-normal">
+                          ({m.ageBand}
+                          {m.birthDate ? ` · ${m.birthDate}` : ''})
+                        </span>
+                      </button>
+                      <p className="text-muted mt-1 text-xs">
+                        {t('voyage.flightClass')}: {flight} ·{' '}
+                        {t('voyage.excursionClass')}: {excursion}
+                      </p>
+                      {open ? (
+                        <form
+                          className="mt-2 flex flex-wrap items-end gap-2"
+                          onSubmit={e => {
+                            e.preventDefault();
+                            void updateMember(m.id, {
+                              birthDate: editBirth.trim() || null,
+                            });
+                            setEditingId(null);
+                          }}
+                        >
+                          <TextField
+                            label={t('voyage.birthDate')}
+                            type="date"
+                            value={editBirth}
+                            onChange={e => setEditBirth(e.target.value)}
+                          />
+                          <Button type="submit" variant="secondary">
+                            {t('voyage.saveMember')}
+                          </Button>
+                        </form>
+                      ) : null}
+                    </li>
+                  );
+                })}
               </ul>
               <form
                 className="mt-4 flex flex-wrap items-end gap-2"
                 onSubmit={e => {
                   e.preventDefault();
                   if (!memberName.trim()) return;
-                  void addMember(currentHousehold.id, memberName.trim());
+                  void addMember(currentHousehold.id, memberName.trim(), {
+                    birthDate: memberBirth.trim() || null,
+                  });
                   setMemberName('');
+                  setMemberBirth('');
                 }}
               >
                 <TextField
                   label={t('voyage.memberName')}
                   value={memberName}
                   onChange={e => setMemberName(e.target.value)}
+                />
+                <TextField
+                  label={t('voyage.birthDate')}
+                  type="date"
+                  value={memberBirth}
+                  onChange={e => setMemberBirth(e.target.value)}
                 />
                 <Button type="submit" variant="secondary">
                   {t('voyage.addMember')}

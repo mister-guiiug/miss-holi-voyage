@@ -30,6 +30,22 @@ export interface VoyageRepository {
   addMember(
     member: Omit<HouseholdMember, 'id'> & { id?: string }
   ): Promise<HouseholdMember>;
+  updateMember(
+    memberId: string,
+    patch: Partial<
+      Pick<
+        HouseholdMember,
+        | 'displayName'
+        | 'birthDate'
+        | 'ageBand'
+        | 'mobilityNotes'
+        | 'foodNotes'
+        | 'sleepNotes'
+        | 'interests'
+        | 'position'
+      >
+    >
+  ): Promise<HouseholdMember>;
   createTrip(householdId: string, title: string): Promise<Trip>;
   updateTrip(tripId: string, patch: Partial<Trip>): Promise<Trip>;
   setStepStatus(

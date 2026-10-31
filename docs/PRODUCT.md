@@ -16,9 +16,16 @@ décisions ni les brouillons structurés de l’IA.
 ## Non-goals (v1)
 
 - Génération Fiche_urgences, Visa, Pourboires, My Maps KML, Programme PDF
-- Réservation / paiement / scraping de billets
+- Réservation / paiement / scraping de billets **ou de catalogues tiers**
+  (partir.com inclus : catalogue embarqué + liens, pas de scrape — ADR 0013)
 - Chat libre sans schéma
 - IA 100 % hors ligne
+
+## MCP distant
+
+Serveur FastMCP dans `mcp/` : une IA complémentaire peut lire/écrire foyers,
+voyageurs (dates de naissance → classes billet), voyages et propositions de
+destinations. Voir `mcp/README.md`.
 
 ## Parcours
 
@@ -31,7 +38,7 @@ Chaque étape a un statut `draft | ready | locked`.
 Voir `src/entities/` — schémas source de vérité côté client ; tables
 homonymes côté Supabase (`supabase/migrations/0006_voyage.sql`).
 
-- `Household`, `HouseholdMembership`, `HouseholdMember`
+- `Household`, `HouseholdMembership`, `HouseholdMember` (`birthDate` → billetterie)
 - `Trip`, `TripStep`
 - `FlightOption`, `FlightChoice`
 - `PoiCandidate`, `PoiVote`

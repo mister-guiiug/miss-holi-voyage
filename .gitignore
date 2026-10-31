@@ -22,3 +22,10 @@ playwright-report/
 test-results/
 
 supabase/.temp/
+
+# MCP voyage (venv + magasin local)
+mcp/.venv/
+mcp/**/__pycache__/
+mcp/**/*.py[cod]
+mcp/data/*.json
+!mcp/data/.gitkeep
