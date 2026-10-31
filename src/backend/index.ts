@@ -1,7 +1,9 @@
 import { createBackendSelector } from '@mister-guiiug/dev-pwa-config/backend';
 import { createLogger } from '@mister-guiiug/dev-pwa-config/logger';
 import { createLocalBackend } from './local.ts';
+import { createLocalVoyage } from './voyage-local.ts';
 import { createSupabaseNotes } from './supabase.ts';
+import { createSupabaseVoyage } from './voyage-supabase.ts';
 import { createQueuedNotes, type QueuedNotes } from './queued-notes.ts';
 import type { Backend } from './ports.ts';
 
@@ -49,18 +51,19 @@ const selectBackend = createBackendSelector<Backend>({
       // Absente l'une des deux, ce backend n'est pas retenu et l'application
       // s'ouvre en local — sans erreur, et en le disant dans les réglages.
       requires: ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'],
-      // Un objet PARTIEL : seul le port `notes` est distant. Tout ce qui n'est
-      // pas nommé ici reste servi par le repli. C'est ce qui permet de migrer
-      // une application déjà en production, port par port.
+      // Ports distants : `notes` (file hors ligne) + `voyage` (foyers /
+      // invitations collaboratives). Sans session, voyage retombe sur le
+      // magasin local — mesuré : un SELECT notes en anon rendait 42501.
       //
-      // L'ADAPTATEUR EST ENVELOPPÉ, PAS MODIFIÉ. `createQueuedNotes` rend le
-      // même port et absorbe l'attente : la file du socle enfile les mutations
-      // et les rejoue au retour du réseau (ADR 0010). L'adaptateur Supabase,
-      // lui, ignore qu'il existe une file — il ne sait qu'écrire une ligne.
+      // L'ADAPTATEUR NOTES EST ENVELOPPÉ, PAS MODIFIÉ. `createQueuedNotes`
+      // rend le même port et absorbe l'attente (ADR 0010).
       create: () => {
         file = createQueuedNotes(createSupabaseNotes());
         void file.start();
-        return { notes: file.notes };
+        return {
+          notes: file.notes,
+          voyage: createSupabaseVoyage(createLocalVoyage()),
+        };
       },
     },
   },

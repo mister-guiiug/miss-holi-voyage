@@ -82,6 +82,10 @@ export function createLocalVoyage(): VoyageRepository {
       return voyageStore.load();
     },
 
+    async clear() {
+      voyageStore.clear();
+    },
+
     async createHousehold(name, notes = '') {
       const snap = voyageStore.load();
       const household: Household = {

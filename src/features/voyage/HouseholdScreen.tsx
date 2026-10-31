@@ -179,6 +179,13 @@ export function HouseholdScreen() {
                           expiresAt: inv.expiresAt,
                         })
                       )
+                      .catch((cause: unknown) => {
+                        window.alert(
+                          cause instanceof Error
+                            ? cause.message
+                            : t('voyage.inviteInvalid')
+                        );
+                      })
                       .finally(() => setBusy(false));
                   }}
                 >

@@ -22,6 +22,8 @@ export type { VoyageSnapshot, StyleProposal };
 
 export interface VoyageRepository {
   load(): Promise<VoyageSnapshot>;
+  /** Efface foyer, voyages, invitations — tout le magasin voyage local. */
+  clear(): Promise<void>;
   createHousehold(name: string, notes?: string): Promise<Household>;
   updateHousehold(
     householdId: string,

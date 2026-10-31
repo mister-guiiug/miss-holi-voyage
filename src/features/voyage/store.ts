@@ -19,6 +19,7 @@ type VoyageState = VoyageSnapshot & {
   error: string | null;
   styleProposals: StyleProposal[];
   load: () => Promise<void>;
+  clear: () => Promise<void>;
   createHousehold: (name: string) => Promise<string>;
   updateHousehold: (
     householdId: string,
@@ -101,6 +102,17 @@ export const useVoyage = create<VoyageState>((set, get) => ({
     } catch (cause) {
       log.error('lecture voyage', { cause });
       set({ error: String(cause), ready: true });
+    }
+  },
+
+  clear: async () => {
+    try {
+      await backend.voyage.clear();
+      await refresh(set);
+    } catch (cause) {
+      log.error('effacement voyage', { cause });
+      set({ error: String(cause) });
+      throw cause;
     }
   },
 

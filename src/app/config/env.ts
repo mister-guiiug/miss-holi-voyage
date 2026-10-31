@@ -19,7 +19,10 @@ const log = createLogger('config');
  * du déploiement.
  */
 const schema = z.object({
-  VITE_BACKEND: z.enum(['local']).optional(),
+  // Aligné sur le sélecteur (`local` | `supabase`) — un enum trop étroit
+  // faisait croire en réglages que VITE_BACKEND était absent alors qu’il
+  // valait `supabase` et que le port notes était bien distant.
+  VITE_BACKEND: z.enum(['local', 'supabase']).optional(),
   VITE_SENTRY_DSN: z.string().url().optional().or(z.literal('')),
   VITE_BASE_PATH: z.string().optional(),
 });

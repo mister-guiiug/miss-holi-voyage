@@ -94,6 +94,14 @@ export function createSupabaseNotes(): Backend['notes'] {
   return {
     async load() {
       const db = await client();
+      // Sans session le rôle PostgREST est `anon` : 0003 lui a retiré tout
+      // GRANT sur `notes` (42501). Ne pas interroger la table — et surtout ne
+      // PAS « corriger » en accordant SELECT à anon (les tests RLS l’interdisent).
+      const {
+        data: { user },
+      } = await db.auth.getUser();
+      if (!user) return notesSchema.parse({ notes: [] });
+
       const { data, error } = await db
         .from('notes')
         .select('id, text, created_at')
