@@ -103,7 +103,8 @@ test.describe('@critical le cadre', () => {
   test('la navigation atteint les destinations', async ({ page }) => {
     await page.goto('/');
 
-    await page.getByRole('link', { name: 'Foyer' }).click();
+    // exact : « Rejoindre un foyer » contient aussi « Foyer ».
+    await page.getByRole('link', { name: 'Foyer', exact: true }).click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Foyer');
 
     await page.getByRole('link', { name: 'Réglages' }).click();
@@ -207,10 +208,13 @@ test.describe('@critical le cadre', () => {
   test('la langue bascule, et le cadre suit', async ({ page }) => {
     await page.goto('/reglages');
 
-    await page.getByRole('tab', { name: 'EN' }).click();
+    // exact : « Instrument » (thème) matche aussi le sous-chaîne « EN ».
+    await page.getByRole('tab', { name: 'EN', exact: true }).click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Settings'
     );
-    await expect(page.getByRole('link', { name: 'Home' })).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Home', exact: true })
+    ).toBeVisible();
   });
 });
