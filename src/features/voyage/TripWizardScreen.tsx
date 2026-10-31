@@ -113,13 +113,17 @@ export function TripWizardScreen() {
           region={region}
           dateStart={dateStart || trip.dateWindowStart || undefined}
           onCountryChange={setCountry}
-          onRegionChange={setRegion}
-          onPick={dest => {
+          onRegionChange={value => {
+            setRegion(value);
+            void updateTrip(trip.id, { destinationRegion: value });
+          }}
+          onPick={(dest, place) => {
+            const nextRegion = place || dest.region || dest.name;
             setCountry(dest.country);
-            setRegion(dest.region || dest.name);
+            setRegion(nextRegion);
             void updateTrip(trip.id, {
               destinationCountry: dest.country,
-              destinationRegion: dest.region || dest.name,
+              destinationRegion: nextRegion,
               destinationNotes: `${dest.summary}\nSource: ${dest.sourceUrl}`,
             });
           }}
