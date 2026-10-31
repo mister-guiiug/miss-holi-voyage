@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CONTINENTS,
+  DESTINATIONS,
   countryCodeForName,
+  destinationMetaLine,
+  destinationsByContinent,
   flagEmoji,
+  getDestination,
   proposeDestinations,
+  searchDestinations,
 } from './destinations.ts';
 
 describe('destinations (partir.com embarqué)', () => {
@@ -17,6 +23,33 @@ describe('destinations (partir.com embarqué)', () => {
     expect(countryCodeForName('Portugal')).toBe('PT');
     expect(countryCodeForName('grèce')).toBe('GR');
     expect(countryCodeForName('')).toBe('');
+  });
+
+  it('couvre les continents du panneau Destinations', () => {
+    expect(CONTINENTS.map(c => c.id)).toEqual([
+      'europe',
+      'asie',
+      'afrique',
+      'amerique_nord',
+      'caraibes',
+      'amerique_sud',
+      'oceanie',
+      'moyen_orient',
+    ]);
+    expect(DESTINATIONS.length).toBeGreaterThan(70);
+    expect(destinationsByContinent('europe').length).toBeGreaterThan(40);
+  });
+
+  it('autocomplète (accents, lieux, enrichissement)', () => {
+    const egy = searchDestinations('egy');
+    expect(egy.some(d => d.id === 'egypte')).toBe(true);
+    const egypte = getDestination('egypte');
+    expect(egypte?.places).toContain('Louxor');
+    expect(destinationMetaLine(egypte!)).toMatch(/1[\s\u202f]?100|1100/);
+    expect(destinationMetaLine(egypte!)).toContain('Vol 4h30');
+
+    const crete = searchDestinations('crète');
+    expect(crete[0]?.id).toBe('crete');
   });
 
   it('propose des destinations famille, filtrables par mois', () => {

@@ -24,8 +24,10 @@ non-goals (pas de scraping de billets / inventaires tiers).
 2. **`birthDate`** sur `household_members` (client Zod + migration SQL) ;
    `ageBand` recalculé ; helpers `flightTicketClass` / `excursionTicketClass`
    (heuristiques IATA-ish / 18 ans excursion).
-3. **Catalogue destinations embarqué**, inspiré de partir.com, chaque entrée
-   avec `sourceUrl` vers le guide / hub — **pas de fetch scrape** au runtime.
+3. **Catalogue destinations embarqué**, calqué sur le panneau « Destinations »
+   de partir.com (continents → pays → lieux), chaque entrée avec `sourceUrl`
+   vers le guide / hub — **pas de fetch scrape** au runtime. Auto-complétion
+   et cartes enrichies (budget / durée / vol indicatifs) restent locales.
 
 ## Conséquences
 

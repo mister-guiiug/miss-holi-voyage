@@ -28,10 +28,10 @@
     "screenshots": "pwa-screenshots --wide-path reglages"
   },
   "bundleBudget": {
-    "_pourquoi": "REPOSÉ À LA MARGE QUE LA RÈGLE DEMANDE, le 20/09/2026. Les trois bornes étaient à 0,2 à 0,6 % du poids mesuré — 479 kB sous 480, 261,0 sous 262, 159,0 sous 160 — alors que le bin qui les vérifie dit « un budget se pose à poids courant + marge », marge 10 % par défaut, et que `pwa-doctor` répète « poser le budget à +10 % ». Une marge d'un kilo-octet ne mesure plus rien : elle fait rougir LA CI DU SOCLE, qui construit ce squelette sur le paquet candidat à chaque PR, dès qu'un composant partagé gagne une ligne. Arrivé le 20/09 avec `BottomNav navigate` et `items[].load` (dev-pwa-config#326) : +1 kB brut sur le morceau principal, +0,4 kB gzip au total, et une borne rouge pour la fonctionnalité que ce squelette est justement là pour montrer. Les valeurs ci-dessous sont le relevé EN CI de `main` (run 35510079498 : 261,0 / 159,0 / 479) porté à +10 % et arrondi au kilo-octet supérieur — la formule de `pwa-bundle-budget` elle-même. MESURER EN CI, PAS EN LOCAL : gh run view <id> -R mister-guiiug/miss-holi-voyage --log | grep 'TOTAL gzip'. LE COÛT DE POSTHOG RESTE DIT, et c'est pour ça que la troisième borne existe : `totalGzipKb` additionne TOUT le JS émis, morceaux différés compris, et `posthog-js` (48,9 kB gzip — l'entrée `module.slim.js` et non l'entrée par défaut, 48,7 kB économisés) est chargé par le `loader` d'`App.tsx` APRÈS l'accord : un visiteur qui refuse ne le télécharge jamais. `preloadGzipKb` mesure ce que `dist/index.html` référence vraiment, et lui ne bouge pas avec PostHog.",
-    "totalGzipKb": 306,
-    "preloadGzipKb": 193,
-    "mainChunkKb": 583
+    "_pourquoi": "REPOSÉ le 31/10/2026 après le catalogue Destinations (continents / pays / lieux, auto-complétion enrichie) dans le chunk principal — pas de lazy : pwa-doctor --strict refuse les morceaux différés sans prefetch + BottomNav navigate, et un catalogue offline ne justifie pas ce couple. Relevés locaux du build : main 599 kB brut, préchargé 200,2 kB gzip, total 301,4 kB gzip → +10 % arrondi (formule de pwa-bundle-budget). MESURER EN CI au prochain run et réajuster si l’écart plateforme est réel. Antérieur 20/09 : marge trop serrée sur le squelette ; PostHog reste hors préchargé (loader après consentement).",
+    "totalGzipKb": 332,
+    "preloadGzipKb": 221,
+    "mainChunkKb": 659
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

@@ -184,19 +184,70 @@ export function TripWizardScreen() {
       </VoyageSheet>
 
       <VoyageSheet title={t('voyage.step.dates')}>
-        <div className="flex flex-col gap-3">
-          <TextField
-            label={t('voyage.dateStart')}
-            value={dateStart}
-            onChange={e => setDateStart(e.target.value)}
-            placeholder="YYYY-MM-DD"
-          />
-          <TextField
-            label={t('voyage.dateEnd')}
-            value={dateEnd}
-            onChange={e => setDateEnd(e.target.value)}
-            placeholder="YYYY-MM-DD"
-          />
+        <div className="voyage-dates flex flex-col gap-3">
+          <label className="voyage-dates__field">
+            <span className="voyage-dates__icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <rect
+                  x="3"
+                  y="5"
+                  width="18"
+                  height="16"
+                  rx="2"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M3 10h18M8 3v4M16 3v4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+            <span className="voyage-dates__body">
+              <span className="voyage-dates__label">
+                {t('voyage.dateStart')}
+              </span>
+              <input
+                className="voyage-dates__input"
+                type="date"
+                value={dateStart}
+                onChange={e => setDateStart(e.target.value)}
+              />
+            </span>
+          </label>
+          <label className="voyage-dates__field">
+            <span className="voyage-dates__icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <rect
+                  x="3"
+                  y="5"
+                  width="18"
+                  height="16"
+                  rx="2"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M3 10h18M8 3v4M16 3v4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+            <span className="voyage-dates__body">
+              <span className="voyage-dates__label">{t('voyage.dateEnd')}</span>
+              <input
+                className="voyage-dates__input"
+                type="date"
+                value={dateEnd}
+                min={dateStart || undefined}
+                onChange={e => setDateEnd(e.target.value)}
+              />
+            </span>
+          </label>
           <TextField
             label={t('voyage.budget')}
             value={budget}
