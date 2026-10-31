@@ -103,6 +103,11 @@ const fr = {
     linkSentTitle: 'Lien envoyé',
     linkSentBody:
       "Un lien vient d'être envoyé à {email}. Ouvrez-le depuis cet appareil : il vous ramènera ici, connecté·e. Il n'est valable qu'une fois.",
+    linkSentRedirect:
+      'Adresse de retour demandée : {url}. Elle doit être autorisée dans Supabase (Authentication → URL Configuration), sinon le lien tombe sur localhost:3000 et échoue.',
+    linkExpired:
+      'Ce lien est invalide ou a expiré — souvent parce que la redirection n’est pas autorisée sur le projet Supabase (Site URL encore localhost:3000) ou qu’il a été ouvert dans un autre navigateur. Demandez un nouveau lien depuis l’adresse où tourne l’app (port 5219 en local).',
+    linkFailed: 'La connexion par lien a échoué : {detail}',
     linkAgain: 'Recevoir un autre lien',
     usePassword: 'Se connecter avec un mot de passe',
     useLink: 'Recevoir un lien plutôt',
@@ -390,6 +395,11 @@ const en: typeof fr = {
     linkSentTitle: 'Link sent',
     linkSentBody:
       'A link was just sent to {email}. Open it from this device: it brings you back here, signed in. It only works once.',
+    linkSentRedirect:
+      'Requested return URL: {url}. It must be allowed in Supabase (Authentication → URL Configuration), or the link falls back to localhost:3000 and fails.',
+    linkExpired:
+      'This link is invalid or expired — often because the redirect is not allowed on the Supabase project (Site URL still localhost:3000) or it was opened in another browser. Request a new link from the address where the app runs (port 5219 locally).',
+    linkFailed: 'Link sign-in failed: {detail}',
     linkAgain: 'Send another link',
     usePassword: 'Sign in with a password',
     useLink: 'Send me a link instead',

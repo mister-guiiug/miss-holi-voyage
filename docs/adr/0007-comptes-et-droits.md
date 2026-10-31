@@ -95,6 +95,9 @@ le flux implicite met le jeton dans le fragment, là où le routeur lit la
 route ; posé ici bien que le squelette route par chemin, parce que ce fichier
 part chez neuf applications qui routent par `#` — et la liste d'URL de retour
 du projet Supabase, qui ne contient que `http://localhost:3000` à la création.
+Les URLs à autoriser pour miss-holi-voyage (port Vite **5219**, Pages) sont
+listées dans `supabase/README.md` — sans elles, le lien tombe sur `:3000` et
+échoue en `otp_expired`.
 
 **Une nuance sur « filtrer par `user_id` dans le front ».** Elle reste vraie
 ici : `notes` n'a qu'une politique de lecture. Le jour où une seconde
