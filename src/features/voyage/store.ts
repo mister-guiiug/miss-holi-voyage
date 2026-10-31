@@ -20,6 +20,10 @@ type VoyageState = VoyageSnapshot & {
   styleProposals: StyleProposal[];
   load: () => Promise<void>;
   createHousehold: (name: string) => Promise<string>;
+  updateHousehold: (
+    householdId: string,
+    patch: { name?: string; notes?: string }
+  ) => Promise<void>;
   createInvite: (
     householdId: string
   ) => Promise<{ token: string; code: string; expiresAt: string }>;
@@ -104,6 +108,11 @@ export const useVoyage = create<VoyageState>((set, get) => ({
     const hh = await backend.voyage.createHousehold(name);
     await refresh(set);
     return hh.id;
+  },
+
+  updateHousehold: async (householdId, patch) => {
+    await backend.voyage.updateHousehold(householdId, patch);
+    await refresh(set);
   },
 
   createInvite: async householdId => {

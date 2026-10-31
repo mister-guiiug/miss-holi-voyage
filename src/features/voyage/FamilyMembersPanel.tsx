@@ -68,6 +68,8 @@ export function FamilyMembersPanel({
     []
   );
   const [showAddExtras, setShowAddExtras] = useState(false);
+  /** Formulaire d’ajout masqué dès qu’il y a déjà des membres — bouton pour rouvrir. */
+  const [showAddForm, setShowAddForm] = useState(members.length === 0);
 
   function openEdit(m: HouseholdMember) {
     setEditingId(m.id);
@@ -200,65 +202,90 @@ export function FamilyMembersPanel({
         })}
       </ul>
 
-      <form
-        className="voyage-member-add flex flex-col gap-3"
-        onSubmit={e => {
-          e.preventDefault();
-          if (!memberName.trim()) return;
-          onAdd({
-            displayName: memberName.trim(),
-            birthDate: memberBirth.trim() || null,
-            gender: memberGender,
-            interests: memberInterests,
-          });
-          setMemberName('');
-          setMemberBirth('');
-          setMemberGender('unspecified');
-          setMemberInterests([]);
-          setShowAddExtras(false);
-        }}
-      >
-        <div className="flex flex-wrap items-end gap-2">
-          <TextField
-            label={t('voyage.memberName')}
-            value={memberName}
-            onChange={e => setMemberName(e.target.value)}
-          />
-          <TextField
-            label={t('voyage.birthDate')}
-            type="date"
-            value={memberBirth}
-            onChange={e => setMemberBirth(e.target.value)}
-          />
-          <Button
-            type="submit"
-            variant="secondary"
-            disabled={!memberName.trim()}
-          >
-            {t('voyage.addMember')}
-          </Button>
-        </div>
-        <button
+      {!showAddForm ? (
+        <Button
           type="button"
-          className="text-muted self-start text-sm underline-offset-2 hover:underline"
-          aria-expanded={showAddExtras}
-          onClick={() => setShowAddExtras(v => !v)}
+          variant="secondary"
+          className="self-start"
+          onClick={() => setShowAddForm(true)}
         >
-          {showAddExtras
-            ? t('voyage.hideProfileExtras')
-            : t('voyage.showProfileExtras')}
-        </button>
-        {showAddExtras ? (
-          <div className="flex flex-col gap-3">
-            <GenderPicker value={memberGender} onChange={setMemberGender} />
-            <InterestPicker
-              value={memberInterests}
-              onChange={setMemberInterests}
-              idPrefix="add"
+          {t('voyage.addMemberCta')}
+        </Button>
+      ) : (
+        <form
+          className="voyage-member-add voyage-member-add--open flex flex-col gap-3"
+          onSubmit={e => {
+            e.preventDefault();
+            if (!memberName.trim()) return;
+            onAdd({
+              displayName: memberName.trim(),
+              birthDate: memberBirth.trim() || null,
+              gender: memberGender,
+              interests: memberInterests,
+            });
+            setMemberName('');
+            setMemberBirth('');
+            setMemberGender('unspecified');
+            setMemberInterests([]);
+            setShowAddExtras(false);
+            setShowAddForm(false);
+          }}
+        >
+          <div className="flex flex-wrap items-end gap-2">
+            <TextField
+              label={t('voyage.memberName')}
+              value={memberName}
+              onChange={e => setMemberName(e.target.value)}
+              autoFocus={members.length > 0}
             />
+            <TextField
+              label={t('voyage.birthDate')}
+              type="date"
+              value={memberBirth}
+              onChange={e => setMemberBirth(e.target.value)}
+            />
+            <Button
+              type="submit"
+              variant="secondary"
+              disabled={!memberName.trim()}
+            >
+              {t('voyage.addMember')}
+            </Button>
+            {members.length > 0 ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setShowAddForm(false);
+                  setShowAddExtras(false);
+                }}
+              >
+                {t('voyage.cancelEdit')}
+              </Button>
+            ) : null}
           </div>
-        ) : null}
-      </form>
+          <button
+            type="button"
+            className="text-muted self-start text-sm underline-offset-2 hover:underline"
+            aria-expanded={showAddExtras}
+            onClick={() => setShowAddExtras(v => !v)}
+          >
+            {showAddExtras
+              ? t('voyage.hideProfileExtras')
+              : t('voyage.showProfileExtras')}
+          </button>
+          {showAddExtras ? (
+            <div className="flex flex-col gap-3">
+              <GenderPicker value={memberGender} onChange={setMemberGender} />
+              <InterestPicker
+                value={memberInterests}
+                onChange={setMemberInterests}
+                idPrefix="add"
+              />
+            </div>
+          ) : null}
+        </form>
+      )}
 
       {inviteSlot}
     </div>

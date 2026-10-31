@@ -1,0 +1,214 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
+import { Card } from '@mister-guiiug/dev-pwa-config/react/card';
+import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
+import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
+import { SkeletonGroup } from '@mister-guiiug/dev-pwa-config/react/skeleton';
+import { useI18n } from '../../i18n/index.ts';
+import { useVoyage } from './store.ts';
+import { InviteShare } from './InviteShare.tsx';
+import { FamilyMembersPanel } from './FamilyMembersPanel.tsx';
+import { MeridianField } from './MeridianField.tsx';
+
+/**
+ * Menu dédié du foyer : nom éditable, membres, invitation.
+ * L’accueil ne porte plus que le voyage ; le profil familial vit ici.
+ */
+export function HouseholdScreen() {
+  const { t } = useI18n();
+  const ready = useVoyage(s => s.ready);
+  const load = useVoyage(s => s.load);
+  const households = useVoyage(s => s.households);
+  const trips = useVoyage(s => s.trips);
+  const members = useVoyage(s => s.members);
+  const createHousehold = useVoyage(s => s.createHousehold);
+  const updateHousehold = useVoyage(s => s.updateHousehold);
+  const createInvite = useVoyage(s => s.createInvite);
+  const addMember = useVoyage(s => s.addMember);
+  const updateMember = useVoyage(s => s.updateMember);
+
+  const [hhName, setHhName] = useState('');
+  const [editName, setEditName] = useState('');
+  const [editingName, setEditingName] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [lastInvite, setLastInvite] = useState<{
+    code: string;
+    expiresAt: string;
+  } | null>(null);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const current = households[0];
+  const householdMembers = current
+    ? members.filter(m => m.householdId === current.id)
+    : [];
+  const ticketOn =
+    trips.find(tr => tr.householdId === current?.id)?.dateWindowStart ??
+    new Date().toISOString().slice(0, 10);
+
+  useEffect(() => {
+    if (current && !editingName) setEditName(current.name);
+  }, [current, editingName]);
+
+  if (!ready) {
+    return <SkeletonGroup label={t('voyage.householdMenu')} lines={4} />;
+  }
+
+  if (!current) {
+    return (
+      <div className="voyage-shell flex flex-col gap-6">
+        <MeridianField />
+        <EmptyState
+          title={t('voyage.noHousehold')}
+          description={t('voyage.noHouseholdHint')}
+        >
+          <form
+            className="mt-4 flex flex-col gap-3"
+            onSubmit={e => {
+              e.preventDefault();
+              if (!hhName.trim()) return;
+              setBusy(true);
+              void createHousehold(hhName.trim()).finally(() => setBusy(false));
+              setHhName('');
+            }}
+          >
+            <TextField
+              label={t('voyage.householdName')}
+              value={hhName}
+              onChange={e => setHhName(e.target.value)}
+            />
+            <Button type="submit" disabled={busy || !hhName.trim()}>
+              {t('voyage.createHousehold')}
+            </Button>
+          </form>
+          <Link
+            to="/rejoindre"
+            className="mt-4 inline-block text-sm underline-offset-2 hover:underline"
+          >
+            {t('voyage.joinTitle')}
+          </Link>
+        </EmptyState>
+      </div>
+    );
+  }
+
+  return (
+    <div className="voyage-shell flex flex-col gap-6">
+      <MeridianField />
+      <header className="voyage-rise relative pt-1">
+        <p className="text-muted m-0 text-xs tracking-[0.14em] uppercase">
+          {t('voyage.householdMenu')}
+        </p>
+        {editingName ? (
+          <form
+            className="mt-2 flex flex-wrap items-end gap-2"
+            onSubmit={e => {
+              e.preventDefault();
+              if (!editName.trim()) return;
+              void updateHousehold(current.id, { name: editName.trim() });
+              setEditingName(false);
+            }}
+          >
+            <TextField
+              label={t('voyage.householdName')}
+              value={editName}
+              onChange={e => setEditName(e.target.value)}
+              autoFocus
+            />
+            <Button type="submit" variant="secondary">
+              {t('voyage.saveHouseholdName')}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setEditName(current.name);
+                setEditingName(false);
+              }}
+            >
+              {t('voyage.cancelEdit')}
+            </Button>
+          </form>
+        ) : (
+          <div className="mt-1 flex flex-wrap items-baseline gap-3">
+            <h2 className="voyage-brand m-0 text-3xl sm:text-4xl">
+              {current.name}
+            </h2>
+            <button
+              type="button"
+              className="text-muted text-sm underline-offset-2 hover:underline"
+              onClick={() => setEditingName(true)}
+            >
+              {t('voyage.editHouseholdName')}
+            </button>
+          </div>
+        )}
+        <p className="text-muted mt-2 text-sm">
+          {householdMembers.length} {t('voyage.members')}
+        </p>
+      </header>
+
+      <Card className="voyage-rise voyage-rise-delay-1">
+        <h3 className="m-0 text-base font-semibold">
+          {t('voyage.membersTitle')}
+        </h3>
+        <div className="mt-4">
+          <FamilyMembersPanel
+            members={householdMembers}
+            ticketOn={ticketOn}
+            onAdd={input => {
+              void addMember(current.id, input.displayName, {
+                birthDate: input.birthDate,
+                gender: input.gender,
+                interests: input.interests,
+              });
+            }}
+            onUpdate={(id, patch) => {
+              void updateMember(id, patch);
+            }}
+            inviteSlot={
+              <>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={busy}
+                    onClick={() => {
+                      setBusy(true);
+                      void createInvite(current.id)
+                        .then(inv =>
+                          setLastInvite({
+                            code: inv.code,
+                            expiresAt: inv.expiresAt,
+                          })
+                        )
+                        .finally(() => setBusy(false));
+                    }}
+                  >
+                    {t('voyage.createInvite')}
+                  </Button>
+                </div>
+                {lastInvite ? (
+                  <InviteShare
+                    code={lastInvite.code}
+                    expiresAt={lastInvite.expiresAt}
+                    onClose={() => setLastInvite(null)}
+                  />
+                ) : null}
+              </>
+            }
+          />
+        </div>
+      </Card>
+
+      <p className="voyage-rise voyage-rise-delay-2 text-sm">
+        <Link to="/" className="underline-offset-2 hover:underline">
+          {t('voyage.backToTrips')}
+        </Link>
+      </p>
+    </div>
+  );
+}

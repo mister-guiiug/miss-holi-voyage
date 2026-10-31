@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronRight, Users } from 'lucide-react';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
-import { Card } from '@mister-guiiug/dev-pwa-config/react/card';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
 import { SkeletonGroup } from '@mister-guiiug/dev-pwa-config/react/skeleton';
@@ -10,13 +10,10 @@ import { useI18n } from '../../i18n/index.ts';
 import { REPO_URL } from '../../app/links.ts';
 import { normalizeInviteCode } from '../../entities/invite-code.ts';
 import { useVoyage } from './store.ts';
-import { InviteShare } from './InviteShare.tsx';
 import { MeridianField } from './MeridianField.tsx';
-import { FamilyMembersPanel } from './FamilyMembersPanel.tsx';
 
 /**
- * Accueil voyage : marque en héros, champ méridien, foyers et voyages.
- * L’accroche `app.tagline` et le pied de page famille restent ici.
+ * Accueil : le voyage est central. Le foyer est un accès secondaire (`/foyer`).
  */
 export function HomeScreen() {
   const { t } = useI18n();
@@ -26,21 +23,15 @@ export function HomeScreen() {
   const trips = useVoyage(s => s.trips);
   const members = useVoyage(s => s.members);
   const createHousehold = useVoyage(s => s.createHousehold);
-  const createInvite = useVoyage(s => s.createInvite);
   const acceptInvite = useVoyage(s => s.acceptInvite);
-  const addMember = useVoyage(s => s.addMember);
-  const updateMember = useVoyage(s => s.updateMember);
   const createTrip = useVoyage(s => s.createTrip);
 
   const [hhName, setHhName] = useState('');
   const [tripTitle, setTripTitle] = useState('');
   const [inviteToken, setInviteToken] = useState('');
-  const [lastInvite, setLastInvite] = useState<{
-    code: string;
-    expiresAt: string;
-  } | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showNewTrip, setShowNewTrip] = useState(false);
 
   useEffect(() => {
     void load();
@@ -50,11 +41,11 @@ export function HomeScreen() {
   const householdTrips = currentHousehold
     ? trips.filter(tr => tr.householdId === currentHousehold.id)
     : [];
-  const householdMembers = currentHousehold
-    ? members.filter(m => m.householdId === currentHousehold.id)
-    : [];
-  const ticketOn =
-    householdTrips[0]?.dateWindowStart ?? new Date().toISOString().slice(0, 10);
+  const memberCount = currentHousehold
+    ? members.filter(m => m.householdId === currentHousehold.id).length
+    : 0;
+  const currentTrip =
+    householdTrips.find(tr => tr.isCurrent) ?? householdTrips[0];
 
   return (
     <div className="voyage-shell flex flex-col gap-8">
@@ -135,108 +126,136 @@ export function HomeScreen() {
         </div>
       ) : (
         <>
-          <div className="voyage-rise voyage-rise-delay-1">
-            <Card>
-              <h2 className="voyage-brand text-2xl">{currentHousehold.name}</h2>
-              <p className="text-muted mt-1 text-sm">
-                {householdMembers.length} {t('voyage.members')}
-              </p>
-              <div className="mt-4">
-                <FamilyMembersPanel
-                  members={householdMembers}
-                  ticketOn={ticketOn}
-                  onAdd={input => {
-                    void addMember(currentHousehold.id, input.displayName, {
-                      birthDate: input.birthDate,
-                      gender: input.gender,
-                      interests: input.interests,
-                    });
-                  }}
-                  onUpdate={(id, patch) => {
-                    void updateMember(id, patch);
-                  }}
-                  inviteSlot={
-                    <>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          disabled={busy}
-                          onClick={() => {
-                            setBusy(true);
-                            void createInvite(currentHousehold.id)
-                              .then(inv =>
-                                setLastInvite({
-                                  code: inv.code,
-                                  expiresAt: inv.expiresAt,
-                                })
-                              )
-                              .finally(() => setBusy(false));
-                          }}
-                        >
-                          {t('voyage.createInvite')}
-                        </Button>
-                      </div>
-                      {lastInvite ? (
-                        <InviteShare
-                          code={lastInvite.code}
-                          expiresAt={lastInvite.expiresAt}
-                          onClose={() => setLastInvite(null)}
-                        />
-                      ) : null}
-                    </>
-                  }
-                />
-              </div>
-            </Card>
-          </div>
+          <Link
+            to="/foyer"
+            className="voyage-hh-teaser voyage-rise voyage-rise-delay-1"
+          >
+            <span className="voyage-hh-teaser__icon" aria-hidden>
+              <Users size={18} strokeWidth={2} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium">{currentHousehold.name}</span>
+              <span className="text-muted text-sm">
+                {memberCount} {t('voyage.members')} ·{' '}
+                {t('voyage.openHousehold')}
+              </span>
+            </span>
+            <ChevronRight className="text-muted shrink-0" aria-hidden />
+          </Link>
 
-          <section className="voyage-rise voyage-rise-delay-2 flex flex-col gap-3">
-            <h2 className="voyage-brand text-2xl">{t('voyage.trips')}</h2>
+          <section className="voyage-rise voyage-rise-delay-2 flex flex-col gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <h2 className="voyage-brand m-0 text-3xl">{t('voyage.trips')}</h2>
+              {!showNewTrip && householdTrips.length > 0 ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setShowNewTrip(true)}
+                >
+                  {t('voyage.createTrip')}
+                </Button>
+              ) : null}
+            </div>
+
             {householdTrips.length === 0 ? (
-              <p className="text-muted text-sm">{t('voyage.noTrips')}</p>
+              <div className="voyage-trip-hero voyage-trip-hero--empty">
+                <p className="voyage-brand m-0 text-2xl">
+                  {t('voyage.noTripsHero')}
+                </p>
+                <p className="text-muted mt-2 max-w-prose text-sm">
+                  {t('voyage.noTrips')}
+                </p>
+                <form
+                  className="mt-5 flex flex-wrap items-end gap-2"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    if (!tripTitle.trim()) return;
+                    void createTrip(currentHousehold.id, tripTitle.trim());
+                    setTripTitle('');
+                  }}
+                >
+                  <TextField
+                    label={t('voyage.tripTitle')}
+                    value={tripTitle}
+                    onChange={e => setTripTitle(e.target.value)}
+                  />
+                  <Button type="submit">{t('voyage.createTrip')}</Button>
+                </form>
+              </div>
             ) : (
-              <ul className="flex flex-col gap-2">
-                {householdTrips.map(tr => (
-                  <li key={tr.id}>
-                    <Card>
+              <ul className="m-0 flex list-none flex-col gap-4 p-0">
+                {householdTrips.map((tr, i) => {
+                  const featured = tr.id === currentTrip?.id;
+                  return (
+                    <li
+                      key={tr.id}
+                      className={
+                        featured
+                          ? 'voyage-trip-hero voyage-trip-hero--featured'
+                          : 'voyage-trip-hero'
+                      }
+                      style={{ animationDelay: `${60 + i * 40}ms` }}
+                    >
                       <Link
                         to={`/voyage/${tr.id}`}
-                        className="font-medium underline-offset-2 hover:underline"
+                        className="voyage-trip-hero__link"
                       >
-                        {tr.title}
+                        <span className="voyage-trip-hero__kicker">
+                          {featured
+                            ? t('voyage.currentTrip')
+                            : t('voyage.trips')}
+                        </span>
+                        <span className="voyage-trip-hero__title">
+                          {tr.title}
+                        </span>
+                        <span className="voyage-trip-hero__meta text-muted">
+                          {tr.destinationCountry || t('voyage.noDestination')}
+                          {tr.style !== 'undecided'
+                            ? ` · ${t(`voyage.styleLabel.${tr.style}`)}`
+                            : ''}
+                        </span>
+                        <span className="voyage-trip-hero__cta">
+                          {t('voyage.continueTrip')}
+                          <ChevronRight size={18} aria-hidden />
+                        </span>
                       </Link>
-                      <p className="text-muted mt-1 text-sm">
-                        {tr.destinationCountry || t('voyage.noDestination')}
-                        {tr.style !== 'undecided' ? ` · ${tr.style}` : ''}
-                      </p>
-                    </Card>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
             )}
-            <form
-              className="flex flex-wrap items-end gap-2"
-              onSubmit={e => {
-                e.preventDefault();
-                if (!tripTitle.trim()) return;
-                void createTrip(currentHousehold.id, tripTitle.trim());
-                setTripTitle('');
-              }}
-            >
-              <TextField
-                label={t('voyage.tripTitle')}
-                value={tripTitle}
-                onChange={e => setTripTitle(e.target.value)}
-              />
-              <Button type="submit">{t('voyage.createTrip')}</Button>
-            </form>
+
+            {showNewTrip ? (
+              <form
+                className="voyage-member-add--open flex flex-wrap items-end gap-2"
+                onSubmit={e => {
+                  e.preventDefault();
+                  if (!tripTitle.trim()) return;
+                  void createTrip(currentHousehold.id, tripTitle.trim());
+                  setTripTitle('');
+                  setShowNewTrip(false);
+                }}
+              >
+                <TextField
+                  label={t('voyage.tripTitle')}
+                  value={tripTitle}
+                  onChange={e => setTripTitle(e.target.value)}
+                  autoFocus
+                />
+                <Button type="submit">{t('voyage.createTrip')}</Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setShowNewTrip(false)}
+                >
+                  {t('voyage.cancelEdit')}
+                </Button>
+              </form>
+            ) : null}
           </section>
         </>
       )}
 
-      {/* `issues` : opt-in du socle pour « Signaler un problème » (bug.yml).
-          Absent, le pied rate la règle famille et le smoke e2e sur `/`. */}
       <AppFooter repoUrl={REPO_URL} issues />
     </div>
   );

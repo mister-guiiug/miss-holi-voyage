@@ -108,6 +108,24 @@ export function createLocalVoyage(): VoyageRepository {
       return household;
     },
 
+    async updateHousehold(householdId, patch) {
+      const snap = voyageStore.load();
+      const idx = snap.households.findIndex(h => h.id === householdId);
+      if (idx < 0) throw new Error(`foyer inconnu: ${householdId}`);
+      const prev = snap.households[idx]!;
+      const row: Household = {
+        ...prev,
+        ...patch,
+        name: patch.name != null ? patch.name.trim() : prev.name,
+        updatedAt: now(),
+      };
+      if (!row.name) throw new Error('nom de foyer vide');
+      const households = snap.households.slice();
+      households[idx] = row;
+      voyageStore.save({ ...snap, households });
+      return row;
+    },
+
     async createInvite(householdId) {
       const token = createId('inv').replace(/^inv_/, '');
       const code = createInviteCode();

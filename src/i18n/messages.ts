@@ -27,6 +27,7 @@ const fr = {
   },
   nav: {
     home: 'Accueil',
+    household: 'Foyer',
     settings: 'Réglages',
     account: 'Compte',
     about: 'À propos',
@@ -114,6 +115,34 @@ const fr = {
     noHouseholdHint:
       'Créez un foyer pour y ranger le profil familial et les voyages.',
     householdName: 'Nom du foyer',
+    householdMenu: 'Foyer',
+    membersTitle: 'Voyageurs',
+    editHouseholdName: 'Modifier le nom',
+    saveHouseholdName: 'Enregistrer le nom',
+    openHousehold: 'Gérer le foyer',
+    backToTrips: 'Retour aux voyages',
+    addMemberCta: 'Ajouter une personne',
+    currentTrip: 'Voyage en cours',
+    continueTrip: 'Continuer',
+    noTripsHero: 'Votre prochain voyage',
+    styleLead:
+      'Deux façons de parcourir la destination — choisissez celle qui vous va.',
+    styleLabel: {
+      hub: 'Base fixe',
+      roadtrip: 'Roadtrip',
+      undecided: 'À décider',
+    },
+    styleDesc: {
+      hub: 'Une ville-camp de base pour rayonner : moins de bagages à bouger, journées plus courtes.',
+      roadtrip:
+        'Enchaîner 2 à 4 zones pour varier les paysages et les découvertes.',
+    },
+    styleHint: {
+      hub: 'Privilégier un aéroport international bien desservi.',
+      roadtrip:
+        'Vol ouvert (arrivée A / retour B) ou hub + location de véhicule.',
+    },
+    styleSelected: 'Style retenu',
     createHousehold: 'Créer le foyer',
     inviteToken: 'Code d’invitation',
     inviteCodeLabel: 'Code d’invitation',
@@ -229,7 +258,7 @@ const fr = {
       specs: 'Questions de spécification',
       dates: 'Fenêtre de dates',
       flights: 'Vols aller-retour',
-      style: 'Hub ou roadtrip',
+      style: 'Base fixe ou roadtrip',
       excursions: 'Excursions / sites',
     },
     vote: {
@@ -249,6 +278,7 @@ const en: typeof fr = {
   },
   nav: {
     home: 'Home',
+    household: 'Household',
     settings: 'Settings',
     account: 'Account',
     about: 'About',
@@ -336,6 +366,32 @@ const en: typeof fr = {
     noHousehold: 'No household yet',
     noHouseholdHint: 'Create a household for family profile and trips.',
     householdName: 'Household name',
+    householdMenu: 'Household',
+    membersTitle: 'Travelers',
+    editHouseholdName: 'Edit name',
+    saveHouseholdName: 'Save name',
+    openHousehold: 'Manage household',
+    backToTrips: 'Back to trips',
+    addMemberCta: 'Add a person',
+    currentTrip: 'Current trip',
+    continueTrip: 'Continue',
+    noTripsHero: 'Your next trip',
+    styleLead:
+      'Two ways to explore the destination — pick the one that fits you.',
+    styleLabel: {
+      hub: 'Hub base',
+      roadtrip: 'Road trip',
+      undecided: 'Undecided',
+    },
+    styleDesc: {
+      hub: 'One home base to fan out from: fewer bag moves, shorter days.',
+      roadtrip: 'Link 2–4 areas to vary landscapes and discoveries.',
+    },
+    styleHint: {
+      hub: 'Prefer a well-served international airport.',
+      roadtrip: 'Open-jaw flights (in A / out B) or hub + rental car.',
+    },
+    styleSelected: 'Selected style',
     createHousehold: 'Create household',
     inviteToken: 'Invite code',
     inviteCodeLabel: 'Invite code',

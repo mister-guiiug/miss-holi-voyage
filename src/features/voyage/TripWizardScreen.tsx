@@ -7,6 +7,7 @@ import { SkeletonGroup } from '@mister-guiiug/dev-pwa-config/react/skeleton';
 import { STEP_ORDER, ARTIFACT_TYPES_W2 } from '../../entities/schemas.ts';
 import { useI18n } from '../../i18n/index.ts';
 import { useVoyage } from './store.ts';
+import { StyleChoice } from './StyleChoice.tsx';
 
 export function TripWizardScreen() {
   const { tripId = '' } = useParams();
@@ -305,39 +306,16 @@ export function TripWizardScreen() {
 
       {/* W3 — style */}
       <Card>
-        <h3 className="font-semibold">{t('voyage.step.style')}</h3>
-        <Button
-          type="button"
-          className="mt-3"
-          onClick={() => void proposeStyles(trip.id)}
-        >
-          {t('voyage.proposeStyles')}
-        </Button>
-        <ul className="mt-4 flex flex-col gap-3">
-          {styleProposals.map(p => (
-            <li key={p.style}>
-              <Card>
-                <p className="font-medium">{p.style}</p>
-                <p className="mt-1 text-sm">{p.summary}</p>
-                <p className="text-muted mt-1 text-xs">{p.airportHints}</p>
-                <Button
-                  type="button"
-                  className="mt-2"
-                  onClick={() =>
-                    void setStyle(trip.id, p.style, p.summary).then(() =>
-                      setStepStatus(trip.id, 'style', 'ready')
-                    )
-                  }
-                >
-                  {t('voyage.chooseStyle')}
-                </Button>
-              </Card>
-            </li>
-          ))}
-        </ul>
-        <p className="text-muted mt-2 text-sm">
-          {t('voyage.currentStyle')}: {trip.style}
-        </p>
+        <StyleChoice
+          currentStyle={trip.style}
+          proposals={styleProposals}
+          onPropose={() => void proposeStyles(trip.id)}
+          onChoose={(style, summary) => {
+            void setStyle(trip.id, style, summary).then(() =>
+              setStepStatus(trip.id, 'style', 'ready')
+            );
+          }}
+        />
       </Card>
 
       {/* W3 — excursions */}

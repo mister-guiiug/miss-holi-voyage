@@ -23,6 +23,10 @@ export type { VoyageSnapshot, StyleProposal };
 export interface VoyageRepository {
   load(): Promise<VoyageSnapshot>;
   createHousehold(name: string, notes?: string): Promise<Household>;
+  updateHousehold(
+    householdId: string,
+    patch: Partial<Pick<Household, 'name' | 'notes'>>
+  ): Promise<Household>;
   createInvite(householdId: string): Promise<{
     token: string;
     code: string;

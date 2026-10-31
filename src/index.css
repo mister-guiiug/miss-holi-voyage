@@ -346,9 +346,286 @@ body {
   line-height: 1.3;
 }
 
+.voyage-member-add--open {
+  animation: voyage-rise 0.35s ease-out both;
+}
+
+/* —— Accueil : teaser foyer + voyage en exergue —— */
+
+.voyage-hh-teaser {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--dwc-border);
+  border-radius: var(--radius-card);
+  background: color-mix(in oklab, var(--dwc-surface) 88%, var(--voyage-glow));
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.voyage-hh-teaser:hover {
+  border-color: var(--voyage-accent);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px
+    color-mix(in oklab, var(--voyage-glow) 28%, transparent);
+}
+
+.voyage-hh-teaser__icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: var(--dwc-primary-soft);
+  color: var(--voyage-accent);
+}
+
+.voyage-trip-hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--dwc-border);
+  border-radius: calc(var(--radius-card) + 0.15rem);
+  background: var(--dwc-surface);
+  animation: voyage-rise 0.55s ease-out both;
+}
+
+.voyage-trip-hero--featured {
+  border-color: color-mix(
+    in oklab,
+    var(--voyage-accent) 55%,
+    var(--dwc-border)
+  );
+  box-shadow: 0 12px 36px
+    color-mix(in oklab, var(--voyage-glow) 22%, transparent);
+}
+
+.voyage-trip-hero--featured::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--voyage-glow), var(--voyage-accent));
+}
+
+.voyage-trip-hero--empty {
+  padding: 1.5rem 1.25rem;
+  background:
+    radial-gradient(
+      120% 80% at 100% 0%,
+      color-mix(in oklab, var(--voyage-glow) 28%, transparent),
+      transparent 55%
+    ),
+    var(--dwc-surface);
+}
+
+.voyage-trip-hero__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.25rem 1.25rem 1.25rem 1.4rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.voyage-trip-hero__kicker {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--voyage-accent);
+}
+
+.voyage-trip-hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.voyage-trip-hero__meta {
+  font-size: 0.9rem;
+}
+
+.voyage-trip-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.65rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--voyage-accent);
+}
+
+.voyage-trip-hero__link:hover .voyage-trip-hero__cta {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* —— Style hub / roadtrip : cartes illustrées + motion —— */
+
+.voyage-style-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--dwc-border);
+  border-radius: calc(var(--radius-card) + 0.1rem);
+  background: var(--dwc-surface);
+  animation: voyage-rise 0.5s ease-out both;
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.voyage-style-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--dwc-border-strong);
+  box-shadow: 0 14px 32px
+    color-mix(in oklab, var(--voyage-glow) 20%, transparent);
+}
+
+.voyage-style-card--selected {
+  border-color: var(--voyage-accent);
+  box-shadow:
+    0 0 0 1px var(--voyage-accent),
+    0 16px 36px color-mix(in oklab, var(--voyage-glow) 28%, transparent);
+}
+
+.voyage-style-card--pulse {
+  animation: voyage-style-pick 0.55s ease-out;
+}
+
+.voyage-style-card__media {
+  position: relative;
+  height: 8.5rem;
+  overflow: hidden;
+  background: var(--dwc-surface-2);
+}
+
+.voyage-style-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.voyage-style-card__badge {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--dwc-surface) 88%, transparent);
+  color: var(--voyage-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+
+.voyage-style-card__body {
+  padding: 1rem 1rem 1.15rem;
+}
+
+.voyage-style-card__title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 650;
+}
+
+.voyage-style-sun {
+  transform-origin: center;
+  animation: voyage-style-glow 4.5s ease-in-out infinite;
+}
+
+.voyage-style-rays {
+  animation: voyage-style-breathe 5s ease-in-out infinite;
+}
+
+.voyage-style-road-dash {
+  animation: voyage-style-dash 1.8s linear infinite;
+}
+
+.voyage-style-car {
+  animation: voyage-style-drive 3.2s ease-in-out infinite;
+}
+
+@keyframes voyage-style-glow {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes voyage-style-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}
+
+@keyframes voyage-style-dash {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+@keyframes voyage-style-drive {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+@keyframes voyage-style-pick {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .voyage-chip,
-  .voyage-interest {
+  .voyage-interest,
+  .voyage-hh-teaser,
+  .voyage-style-card,
+  .voyage-member-add--open {
     transition: none;
+    animation: none;
+  }
+
+  .voyage-style-sun,
+  .voyage-style-rays,
+  .voyage-style-road-dash,
+  .voyage-style-car,
+  .voyage-style-card--pulse {
+    animation: none;
+  }
+
+  .voyage-hh-teaser:hover,
+  .voyage-style-card:hover {
+    transform: none;
   }
 }
