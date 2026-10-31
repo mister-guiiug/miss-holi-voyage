@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { Card, CardHeader } from '@mister-guiiug/dev-pwa-config/react/card';
 import { Badge } from '@mister-guiiug/dev-pwa-config/react/badge';
 import { LoginForm } from '@mister-guiiug/dev-pwa-config/react/login-form';
 import { useAuthContext } from '@mister-guiiug/dev-pwa-config/react/auth-provider';
 import { useI18n } from '../../i18n/index.ts';
-import { adresseDeRetour, useRole } from '../../auth/index.ts';
+import {
+  adresseDeRetour,
+  lireErreurAuthDansUrl,
+  nettoyerErreurAuthDansUrl,
+  useRole,
+} from '../../auth/index.ts';
 import { coverage } from '../../backend/index.ts';
 import { DangerZone } from './DangerZone.tsx';
 
@@ -39,6 +44,18 @@ export function AccountScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const [retourDemande] = useState(() => adresseDeRetour());
+
+  useEffect(() => {
+    const err = lireErreurAuthDansUrl();
+    if (!err) return;
+    setError(
+      err.code === 'otp_expired'
+        ? t('account.linkExpired')
+        : t('account.linkFailed', { detail: err.description })
+    );
+    nettoyerErreurAuthDansUrl();
+  }, [t]);
 
   if (coverage.kind !== 'supabase') {
     return (
@@ -107,6 +124,9 @@ export function AccountScreen() {
         <CardHeader title={t('account.linkSentTitle')} />
         <p role="status" className="m-0">
           {t('account.linkSentBody', { email: sentTo })}
+        </p>
+        <p className="text-muted m-0 text-sm">
+          {t('account.linkSentRedirect', { url: retourDemande })}
         </p>
         <Button variant="ghost" size="sm" onClick={() => setSentTo(null)}>
           {t('account.linkAgain')}

@@ -39,8 +39,13 @@ enabled = false
 
 [auth]
 enabled = true
-site_url = "http://127.0.0.1:5240"
-additional_redirect_urls = ["http://localhost:5240"]
+# Port Vite de miss-holi-voyage (`devPortOf` → 5219), pas le 3000 / 5240 par défaut.
+site_url = "http://127.0.0.1:5219"
+additional_redirect_urls = [
+  "http://127.0.0.1:5219/**",
+  "http://localhost:5219/**",
+  "https://mister-guiiug.github.io/miss-holi-voyage/**",
+]
 jwt_expiry = 3600
 enable_signup = true
 enable_anonymous_sign_ins = false

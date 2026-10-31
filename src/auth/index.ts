@@ -110,9 +110,77 @@ export function authAdapter(): SupabaseAuthAdapter | null {
   return cache;
 }
 
-/** Où le lien magique ramène — origine servie + base Vite. */
+/**
+ * Où le lien magique ramène.
+ *
+ * Calculé depuis l’origine SERVIE (jamais une constante) : le même bundle
+ * tourne en local et sur Pages. Doit figurer dans Authentication → URL
+ * Configuration du projet Supabase ; sans ça, GoTrue substitue le `Site URL`
+ * (souvent encore `http://localhost:3000` à la création) et le PKCE échoue
+ * avec `otp_expired` / `access_denied` sur le mauvais port.
+ *
+ * On vise `/compte` : l’échange `?code=` et le retour connecté y sont visibles.
+ */
 export function adresseDeRetour(): string {
-  return `${window.location.origin}${import.meta.env.BASE_URL}`;
+  const base = import.meta.env.BASE_URL || '/';
+  const root = new URL(base, window.location.origin);
+  return new URL('compte', root).href;
+}
+
+/** Erreurs Auth présentes dans l’URL après un lien magique refusé. */
+export function lireErreurAuthDansUrl(
+  href: string = typeof window !== 'undefined' ? window.location.href : ''
+): { code: string; description: string } | null {
+  if (!href) return null;
+  let url: URL;
+  try {
+    url = new URL(href);
+  } catch {
+    return null;
+  }
+  const fromSearch = url.searchParams;
+  const hash = url.hash.startsWith('#') ? url.hash.slice(1) : url.hash;
+  const fromHash = new URLSearchParams(hash);
+  const code =
+    fromSearch.get('error_code') ||
+    fromHash.get('error_code') ||
+    fromSearch.get('error') ||
+    fromHash.get('error');
+  if (!code) return null;
+  const description =
+    fromSearch.get('error_description') ||
+    fromHash.get('error_description') ||
+    code;
+  return { code, description: description.replace(/\+/g, ' ') };
+}
+
+/** Retire les paramètres d’erreur Auth de la barre d’adresse. */
+export function nettoyerErreurAuthDansUrl(): void {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+  let changed = false;
+  for (const key of [
+    'error',
+    'error_code',
+    'error_description',
+    'sb',
+  ] as const) {
+    if (url.searchParams.has(key)) {
+      url.searchParams.delete(key);
+      changed = true;
+    }
+  }
+  if (url.hash.includes('error')) {
+    url.hash = '';
+    changed = true;
+  }
+  if (changed) {
+    window.history.replaceState(
+      {},
+      '',
+      `${url.pathname}${url.search}${url.hash}`
+    );
+  }
 }
 
 export function useRole(): { admin: boolean; ready: boolean } {
