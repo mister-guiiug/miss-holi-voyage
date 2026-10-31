@@ -11,12 +11,12 @@ Dans le tableau de bord du projet (`damixtzatbdqsjragbpz`) :
 
 **Authentication → URL Configuration**
 
-| Champ | Valeur |
-| ----- | ------ |
-| Site URL | `https://mister-guiiug.github.io/miss-holi-voyage/` (prod) ou `http://127.0.0.1:5219/` en pure local |
-| Redirect URLs | `http://127.0.0.1:5219/**` |
-| | `http://localhost:5219/**` |
-| | `https://mister-guiiug.github.io/miss-holi-voyage/**` |
+| Champ         | Valeur                                                                                               |
+| ------------- | ---------------------------------------------------------------------------------------------------- |
+| Site URL      | `https://mister-guiiug.github.io/miss-holi-voyage/` (prod) ou `http://127.0.0.1:5219/` en pure local |
+| Redirect URLs | `http://127.0.0.1:5219/**`                                                                           |
+|               | `http://localhost:5219/**`                                                                           |
+|               | `https://mister-guiiug.github.io/miss-holi-voyage/**`                                                |
 
 Le client envoie `emailRedirectTo` = origine courante + base Vite + `compte`
 (`adresseDeRetour()`). Ouvrir le lien **dans le même navigateur** que celui
