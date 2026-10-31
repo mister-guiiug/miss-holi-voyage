@@ -213,6 +213,8 @@ test.describe('@critical le cadre', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Settings'
     );
-    await expect(page.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Home', exact: true })
+    ).toBeVisible();
   });
 });
