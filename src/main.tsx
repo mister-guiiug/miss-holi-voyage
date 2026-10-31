@@ -11,8 +11,15 @@ import { AuthProvider } from '@mister-guiiug/dev-pwa-config/react/auth-provider'
 import { I18nProvider } from './i18n/index.ts';
 import { authAdapter } from './auth/index.ts';
 import { env } from './app/config/env.ts';
+import {
+  appliquerVoyageTheme,
+  lireVoyageTheme,
+} from './features/settings/voyage-theme.ts';
 import { App } from './App.tsx';
 import './index.css';
+
+/* Skin voyage avant le premier paint — évite un flash du défaut « ambiance ». */
+appliquerVoyageTheme(lireVoyageTheme());
 
 /**
  * LA PILE DE FOURNISSEURS, ET SON ORDRE.

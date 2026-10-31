@@ -4,9 +4,9 @@
  */
 export function MeridianField() {
   return (
-    <div className="voyage-meridian" aria-hidden="true">
+    <div className="voyage-atmosphere voyage-meridian" aria-hidden="true">
       <svg
-        className="voyage-meridian__svg"
+        className="voyage-atmosphere__svg voyage-meridian__svg"
         viewBox="0 0 1200 800"
         preserveAspectRatio="xMidYMid slice"
       >

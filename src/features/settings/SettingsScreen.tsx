@@ -10,6 +10,11 @@ import { useI18n } from '../../i18n/index.ts';
 import { backend, coverage } from '../../backend/index.ts';
 import { useNotes } from '../home/store.ts';
 import { configReport } from '../../app/config/env.ts';
+import {
+  VOYAGE_THEMES,
+  useVoyageTheme,
+  type VoyageTheme,
+} from './voyage-theme.ts';
 
 /**
  * L'écran de réglages : le seul écran que TOUTES les apps de la famille ont, et
@@ -31,6 +36,7 @@ import { configReport } from '../../app/config/env.ts';
  */
 export function SettingsScreen() {
   const { t, m, fmt, locale, setLocale, locales } = useI18n();
+  const { theme: voyageTheme, setTheme: setVoyageTheme } = useVoyageTheme();
   const clear = useNotes(state => state.clear);
   const importJson = useNotes(state => state.importJson);
   const notes = useNotes(state => state.notes);
@@ -90,6 +96,20 @@ export function SettingsScreen() {
             }))}
           />
         </ChromePrefs>
+        <div className="mt-4 flex flex-col gap-2">
+          <SegmentedControl
+            value={voyageTheme}
+            onChange={value => setVoyageTheme(value as VoyageTheme)}
+            ariaLabel={t('settings.voyageTheme')}
+            options={VOYAGE_THEMES.map(id => ({
+              value: id,
+              label: t(`settings.voyageThemeOption.${id}`),
+            }))}
+          />
+          <p className="text-muted m-0 text-sm">
+            {t(`settings.voyageThemeHint.${voyageTheme}`)}
+          </p>
+        </div>
       </Card>
 
       <Card>

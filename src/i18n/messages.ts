@@ -59,6 +59,20 @@ const fr = {
     title: 'Réglages',
     appearance: 'Apparence',
     language: 'Langue',
+    voyageTheme: 'Thème voyage',
+    voyageThemeOption: {
+      ambiance: 'Ambiance',
+      album: 'Album',
+      instrument: 'Instrument',
+    },
+    voyageThemeHint: {
+      ambiance:
+        'Carnet : filets, méridien, lumière du jour — composition éditoriale.',
+      album:
+        'Album : panneaux souples, grands titres, rythme lent — même écrans.',
+      instrument:
+        'Instrument : cadres denses, typo tableau de bord — même écrans.',
+    },
     data: 'Données',
     export: 'Exporter mes notes',
     import: 'Importer mes notes',
@@ -315,6 +329,18 @@ const en: typeof fr = {
     title: 'Settings',
     appearance: 'Appearance',
     language: 'Language',
+    voyageTheme: 'Trip theme',
+    voyageThemeOption: {
+      ambiance: 'Ambiance',
+      album: 'Album',
+      instrument: 'Instrument',
+    },
+    voyageThemeHint: {
+      ambiance:
+        'Journal: hairlines, meridian, daylight — editorial composition.',
+      album: 'Album: soft panels, large titles, slower pace — same screens.',
+      instrument: 'Instrument: dense frames, HUD type — same screens.',
+    },
     data: 'Data',
     export: 'Export my notes',
     import: 'Import my notes',

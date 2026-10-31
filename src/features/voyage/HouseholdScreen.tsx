@@ -8,7 +8,7 @@ import { useI18n } from '../../i18n/index.ts';
 import { useVoyage } from './store.ts';
 import { InviteShare } from './InviteShare.tsx';
 import { FamilyMembersPanel } from './FamilyMembersPanel.tsx';
-import { MeridianField } from './MeridianField.tsx';
+import { VoyageAtmosphere } from './VoyageAtmosphere.tsx';
 import { VoyageSheet } from './VoyageSheet.tsx';
 
 /** Menu foyer — page de carnet : nom éditable, voyageurs, invitation. */
@@ -57,7 +57,7 @@ export function HouseholdScreen() {
   if (!current) {
     return (
       <div className="voyage-shell flex flex-col gap-6">
-        <MeridianField />
+          <VoyageAtmosphere />
         <EmptyState
           title={t('voyage.noHousehold')}
           description={t('voyage.noHouseholdHint')}
@@ -94,7 +94,7 @@ export function HouseholdScreen() {
 
   return (
     <div className="voyage-shell flex flex-col gap-2">
-      <MeridianField />
+      <VoyageAtmosphere />
       <header className="voyage-rise relative pt-1 pb-2">
         <p className="text-muted m-0 text-sm">{t('voyage.householdMenu')}</p>
         {editingName ? (

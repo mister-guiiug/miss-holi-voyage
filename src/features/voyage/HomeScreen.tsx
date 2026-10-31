@@ -9,7 +9,7 @@ import { useI18n } from '../../i18n/index.ts';
 import { REPO_URL } from '../../app/links.ts';
 import { normalizeInviteCode } from '../../entities/invite-code.ts';
 import { useVoyage } from './store.ts';
-import { MeridianField } from './MeridianField.tsx';
+import { VoyageAtmosphere } from './VoyageAtmosphere.tsx';
 import { VoyageRule } from './VoyageSheet.tsx';
 
 /**
@@ -50,7 +50,7 @@ export function HomeScreen() {
 
   return (
     <div className="voyage-shell flex flex-col gap-6">
-      <MeridianField />
+      <VoyageAtmosphere />
 
       <header className="voyage-rise relative pt-2">
         <p className="voyage-brand text-4xl sm:text-5xl">{t('app.name')}</p>
