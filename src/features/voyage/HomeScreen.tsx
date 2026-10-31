@@ -207,7 +207,9 @@ export function HomeScreen() {
         </>
       )}
 
-      <AppFooter repoUrl={REPO_URL} />
+      {/* `issues` : opt-in du socle pour « Signaler un problème » (bug.yml).
+          Absent, le pied rate la règle famille et le smoke e2e sur `/`. */}
+      <AppFooter repoUrl={REPO_URL} issues />
     </div>
   );
 }

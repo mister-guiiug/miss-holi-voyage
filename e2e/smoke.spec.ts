@@ -72,9 +72,13 @@ test.describe('@critical le cadre', () => {
     await page.goto('/');
     await expect(page.locator('[data-dwc="sync-status"]')).toHaveCount(0);
 
-    await page.getByLabel('Nom du foyer').fill(`foyer offline ${Date.now()}`);
+    const foyer = `foyer offline ${Date.now()}`;
+    await page.getByLabel('Nom du foyer').fill(foyer);
     await page.getByRole('button', { name: 'Créer le foyer' }).click();
-    await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
+    // Deux h2 après création (foyer + « Voyages ») : viser le nom exact.
+    await expect(
+      page.getByRole('heading', { level: 2, name: foyer })
+    ).toBeVisible();
 
     await context.setOffline(true);
     await expect(page.locator('[data-dwc="connection-banner"]')).toBeVisible({
