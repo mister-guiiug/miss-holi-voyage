@@ -1,81 +1,120 @@
-import { supabaseAuthAdapter } from '@mister-guiiug/dev-pwa-config/auth/supabase';
+/**
+ * Couche auth : SDK à la demande + abonnement synchrone.
+ *
+ * Le Proxy « tout async » du squelette cassait `onAuthStateChange` : le port
+ * attend un désabonnement synchrone, recevait une Promise, et ni connexion
+ * ni déconnexion ne mettaient à jour l’UI. Motif repris de miss-lookhouse
+ * (ADR 0009 / garde hors ligne).
+ */
+import type { SupabaseClient } from '@supabase/supabase-js';
+import {
+  supabaseAuthAdapter,
+  type SupabaseAuthAdapter,
+} from '@mister-guiiug/dev-pwa-config/auth/supabase';
+import {
+  navigateurHorsLigne,
+  storedSupabaseSession,
+} from '@mister-guiiug/dev-pwa-config/auth/stored-session';
 import { useAuthContext } from '@mister-guiiug/dev-pwa-config/react/auth-provider';
 import { supabase } from '../backend/supabase.ts';
 import { coverage } from '../backend/index.ts';
 
-/**
- * L'ADAPTATEUR, OU RIEN.
- *
- * `AuthProvider` accepte `adapter: null` et se met alors en **mode local** :
- * l'état reste `signed-out` et chaque action rend
- * `{ ok: false, error: { code: 'local-mode' } }`. C'est ce qui permet à
- * l'application de garder ses écrans de compte sans backend, au lieu de les
- * masquer derrière une condition qui finit par diverger.
- *
- * L'adaptateur n'est construit que si le backend distant a été retenu — donc
- * si les deux variables sont présentes. Le construire dans tous les cas
- * chargerait le SDK Supabase pour rien.
- */
-let cache: object | null | undefined;
+type AuthApi = SupabaseClient['auth'];
 
-export function authAdapter(): object | null {
+async function apiAuth(): Promise<AuthApi> {
+  // La fabrique ne publie que `SupabaseLike` ; le SDK réel porte toute l’API auth.
+  const client = (await supabase.getClient()) as unknown as SupabaseClient;
+  return client.auth;
+}
+
+/**
+ * Client paresseux : méthodes async, SAUF l’abonnement — rendu synchrone avec
+ * abonnement différé quand le SDK arrive.
+ */
+function sdkALaDemande(): { auth: object } {
+  const auth = {
+    getSession: async () => (await apiAuth()).getSession(),
+    onAuthStateChange: (
+      callback: Parameters<AuthApi['onAuthStateChange']>[0]
+    ) => {
+      let abonnement: { unsubscribe: () => void } | null = null;
+      let annule = false;
+      apiAuth()
+        .then(api => {
+          if (annule) return;
+          abonnement = api.onAuthStateChange(callback).data.subscription;
+        })
+        .catch(() => {
+          /* SDK indisponible : getSession lira le stockage local. */
+        });
+      return {
+        data: {
+          subscription: {
+            unsubscribe: () => {
+              annule = true;
+              abonnement?.unsubscribe();
+            },
+          },
+        },
+      };
+    },
+    signInWithPassword: async (
+      credentials: Parameters<AuthApi['signInWithPassword']>[0]
+    ) => (await apiAuth()).signInWithPassword(credentials),
+    signInWithOtp: async (
+      credentials: Parameters<AuthApi['signInWithOtp']>[0]
+    ) => (await apiAuth()).signInWithOtp(credentials),
+    signUp: async (credentials: Parameters<AuthApi['signUp']>[0]) =>
+      (await apiAuth()).signUp(credentials),
+    signInAnonymously: async () => (await apiAuth()).signInAnonymously(),
+    /**
+     * Toujours locale : la globale exige le réseau et laisse la session
+     * ouverte hors ligne. Même contrainte que `delete-account.ts`.
+     */
+    signOut: async (opts?: { scope?: 'local' | 'global' }) =>
+      (await apiAuth()).signOut({ ...opts, scope: 'local' }),
+  };
+  return { auth };
+}
+
+/**
+ * Hors ligne, un `SIGNED_OUT` sans session effacée du stockage n’est PAS une
+ * déconnexion réelle (renouvellement de jeton abandonné) — on l’ignore.
+ */
+function avecLaGardeHorsLigne(
+  adaptateur: SupabaseAuthAdapter
+): SupabaseAuthAdapter {
+  return {
+    ...adaptateur,
+    onAuthStateChange: callback =>
+      adaptateur.onAuthStateChange((event, session) => {
+        if (!session && navigateurHorsLigne() && storedSupabaseSession()) {
+          return;
+        }
+        callback(event, session);
+      }),
+  };
+}
+
+let cache: SupabaseAuthAdapter | null | undefined;
+
+export function authAdapter(): SupabaseAuthAdapter | null {
   if (cache !== undefined) return cache;
   if (coverage.kind !== 'supabase') {
     cache = null;
     return cache;
   }
-
-  // L'adaptateur du socle veut le client, pas une promesse. On le construit
-  // paresseusement autour de la fabrique : le SDK n'est chargé qu'au premier
-  // appel réel, et l'adaptateur reste synchrone à la création.
-  cache = supabaseAuthAdapter({
-    client: {
-      auth: new Proxy(
-        {},
-        {
-          get(_cible, methode) {
-            return async (...args: unknown[]) => {
-              const client = (await supabase.getClient()) as {
-                auth: Record<string, (...a: unknown[]) => unknown>;
-              };
-              const fn = client.auth[methode as string];
-              if (typeof fn !== 'function') {
-                throw new TypeError(`auth.${String(methode)} inconnu`);
-              }
-              // Déconnexion en portée locale : la globale exige le réseau et
-              // laisse la session ouverte si le serveur ne répond pas
-              // (même motif que delete-account / ADR 0009).
-              if (methode === 'signOut') {
-                const opts =
-                  args[0] && typeof args[0] === 'object'
-                    ? (args[0] as Record<string, unknown>)
-                    : {};
-                return fn.call(client.auth, { scope: 'local', ...opts });
-              }
-              return fn.apply(client.auth, args);
-            };
-          },
-        }
-      ) as object,
-    },
-  }) as unknown as object;
-
+  cache = avecLaGardeHorsLigne(
+    supabaseAuthAdapter({ client: sdkALaDemande() })
+  );
   return cache;
 }
 
-/**
- * LE RÔLE, LU DANS LE JETON — jamais dans une table interrogée depuis le
- * navigateur.
- *
- * Le socle n'a rien pour les droits : `useActionGuard` garde des ACTIONS
- * (en ligne, confirmé), pas des rôles. Huit applications sont sur Supabase et
- * trois ont recopié le même `is_admin` en SQL ; c'est donc à ce niveau que le
- * besoin existe.
- *
- * Ce que rend ce crochet est un CONFORT D'INTERFACE : masquer un bouton que la
- * base refuserait de toute façon. **La sécurité est dans la RLS**, jamais ici —
- * un rôle lu côté client est une information d'affichage, pas une autorisation.
- */
+/** Où le lien magique ramène — origine servie + base Vite. */
+export function adresseDeRetour(): string {
+  return `${window.location.origin}${import.meta.env.BASE_URL}`;
+}
+
 export function useRole(): { admin: boolean; ready: boolean } {
   const { user, ready } = useAuthContext<unknown, Utilisateur>();
   const roles = user?.app_metadata?.roles;

@@ -11,8 +11,8 @@ import { expect, test } from '@playwright/test';
  * Ces tests passent sur un BUILD de production, service worker compris.
  *
  * Remplacés le 31/10/2026 : le squelette « Notes » n'est plus l'accueil — le
- * domaine est foyer + voyage. Les contrats coquille (nav, compte local, SPA
- * fallback, pied de page famille, i18n) restent.
+ * domaine est foyer + voyage. Création foyer possible sur l'accueil (état
+ * vide) ; membres et édition du nom vivent sur `/foyer`.
  */
 test.describe('@critical le cadre', () => {
   test("l'accueil s'ouvre et porte le nom de l'app", async ({ page }) => {
@@ -32,9 +32,8 @@ test.describe('@critical le cadre', () => {
     const foyer = `foyer e2e ${Date.now()}`;
     await page.getByLabel('Nom du foyer').fill(foyer);
     await page.getByRole('button', { name: 'Créer le foyer' }).click();
-    await expect(
-      page.getByRole('heading', { level: 2, name: foyer })
-    ).toBeVisible();
+    // Après création, l'accueil montre un teaser (lien), pas un h2.
+    await expect(page.getByRole('link', { name: new RegExp(foyer) })).toBeVisible();
 
     const voyage = `voyage e2e ${Date.now()}`;
     await page.getByLabel('Titre du voyage').fill(voyage);
@@ -42,9 +41,7 @@ test.describe('@critical le cadre', () => {
     await expect(page.getByRole('link', { name: voyage })).toBeVisible();
 
     await page.reload();
-    await expect(
-      page.getByRole('heading', { level: 2, name: foyer })
-    ).toBeVisible();
+    await expect(page.getByRole('link', { name: new RegExp(foyer) })).toBeVisible();
     await expect(page.getByRole('link', { name: voyage })).toBeVisible();
   });
 
@@ -52,10 +49,13 @@ test.describe('@critical le cadre', () => {
     await page.goto('/');
     await page.getByLabel('Nom du foyer').fill(`foyer membre ${Date.now()}`);
     await page.getByRole('button', { name: 'Créer le foyer' }).click();
+    await expect(page.getByRole('link', { name: /Gérer le foyer/ })).toBeVisible();
 
+    await page.getByRole('link', { name: 'Foyer', exact: true }).click();
+    // Formulaire d’ajout déjà ouvert quand le foyer est vide.
     const membre = `Alex ${Date.now()}`;
     await page.getByLabel('Prénom / surnom').fill(membre);
-    await page.getByRole('button', { name: 'Ajouter' }).click();
+    await page.getByRole('button', { name: 'Ajouter', exact: true }).click();
     await expect(page.getByText(membre)).toBeVisible();
 
     await page.reload();
@@ -75,10 +75,7 @@ test.describe('@critical le cadre', () => {
     const foyer = `foyer offline ${Date.now()}`;
     await page.getByLabel('Nom du foyer').fill(foyer);
     await page.getByRole('button', { name: 'Créer le foyer' }).click();
-    // Deux h2 après création (foyer + « Voyages ») : viser le nom exact.
-    await expect(
-      page.getByRole('heading', { level: 2, name: foyer })
-    ).toBeVisible();
+    await expect(page.getByRole('link', { name: new RegExp(foyer) })).toBeVisible();
 
     await context.setOffline(true);
     await expect(page.locator('[data-dwc="connection-banner"]')).toBeVisible({
@@ -95,8 +92,11 @@ test.describe('@critical le cadre', () => {
     await expect(page.getByRole('link', { name: voyage })).toBeVisible();
   });
 
-  test('la navigation atteint les quatre destinations', async ({ page }) => {
+  test('la navigation atteint les destinations', async ({ page }) => {
     await page.goto('/');
+
+    await page.getByRole('link', { name: 'Foyer' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Foyer');
 
     await page.getByRole('link', { name: 'Réglages' }).click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
@@ -183,7 +183,7 @@ test.describe('@critical le cadre', () => {
       }
     }
 
-    for (const route of ['/reglages', '/compte']) {
+    for (const route of ['/reglages', '/compte', '/foyer']) {
       await page.goto(route);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       await expect(pied, `pied de page interdit sur ${route}`).toHaveCount(0);
