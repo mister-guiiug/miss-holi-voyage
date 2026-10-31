@@ -42,6 +42,16 @@ export function authAdapter(): object | null {
               if (typeof fn !== 'function') {
                 throw new TypeError(`auth.${String(methode)} inconnu`);
               }
+              // Déconnexion en portée locale : la globale exige le réseau et
+              // laisse la session ouverte si le serveur ne répond pas
+              // (même motif que delete-account / ADR 0009).
+              if (methode === 'signOut') {
+                const opts =
+                  args[0] && typeof args[0] === 'object'
+                    ? (args[0] as Record<string, unknown>)
+                    : {};
+                return fn.call(client.auth, { scope: 'local', ...opts });
+              }
               return fn.apply(client.auth, args);
             };
           },

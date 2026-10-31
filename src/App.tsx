@@ -15,6 +15,7 @@ import { AppUpdates } from '@mister-guiiug/dev-pwa-config/react/app-updates';
 import { registerSW } from 'virtual:pwa-register';
 import { useI18n } from './i18n/index.ts';
 import { HomeScreen } from './features/voyage/HomeScreen.tsx';
+import { JoinScreen } from './features/voyage/JoinScreen.tsx';
 import { TripWizardScreen } from './features/voyage/TripWizardScreen.tsx';
 import { useSolarPhase } from './features/voyage/useSolarPhase.ts';
 import { SettingsScreen } from './features/settings/SettingsScreen.tsx';
@@ -98,6 +99,7 @@ export function Shell() {
    * en `h2`, dans `HomeScreen`.
    */
   const tripMatch = pathname.match(/^\/voyage\/[^/]+/);
+  const joinMatch = pathname.startsWith('/rejoindre');
   const titles: Record<string, string> = {
     '/': t('app.name'),
     '/reglages': t('settings.title'),
@@ -108,7 +110,11 @@ export function Shell() {
   return (
     <AppShell
       title={
-        tripMatch ? t('voyage.trips') : (titles[pathname] ?? t('app.name'))
+        tripMatch
+          ? t('voyage.trips')
+          : joinMatch
+            ? t('voyage.joinTitle')
+            : (titles[pathname] ?? t('app.name'))
       }
       backHref={pathname === '/' ? undefined : '/'}
       linkComponent={Link}
@@ -159,6 +165,8 @@ export function Shell() {
       <Routes>
         <Route path="/" element={<HomeScreen />} />
         <Route path="/voyage/:tripId" element={<TripWizardScreen />} />
+        <Route path="/rejoindre" element={<JoinScreen />} />
+        <Route path="/rejoindre/:code" element={<JoinScreen />} />
         <Route path="/reglages" element={<SettingsScreen />} />
         <Route path="/compte" element={<AccountScreen />} />
         <Route path="/a-propos" element={<AboutScreen />} />
