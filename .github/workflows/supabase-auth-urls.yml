@@ -1,0 +1,54 @@
+# Ponctuel : aligne Site URL + Redirect URLs Auth (lien magique).
+# Déclenché à la main ; utilise secrets.SUPABASE_ACCESS_TOKEN (Management API).
+name: Supabase Auth URLs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  patch-auth-urls:
+    runs-on: ubuntu-latest
+    steps:
+      - name: PATCH site_url et uri_allow_list
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: damixtzatbdqsjragbpz
+        run: |
+          set -euo pipefail
+          test -n "${SUPABASE_ACCESS_TOKEN:-}" || { echo "Secret SUPABASE_ACCESS_TOKEN manquant"; exit 1; }
+          BASE="https://api.supabase.com/v1/projects/${PROJECT_REF}/config/auth"
+          BEFORE=$(curl -fsS -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" "$BASE")
+          echo "BEFORE site_url=$(echo "$BEFORE" | jq -r .site_url)"
+          echo "BEFORE uri_allow_list=$(echo "$BEFORE" | jq -r .uri_allow_list)"
+
+          WANT=(
+            "http://127.0.0.1:5219"
+            "http://127.0.0.1:5219/**"
+            "http://localhost:5219"
+            "http://localhost:5219/**"
+            "https://mister-guiiug.github.io/miss-holi-voyage"
+            "https://mister-guiiug.github.io/miss-holi-voyage/**"
+            "https://mister-guiiug.github.io/miss-holi-voyage/compte"
+          )
+          CURRENT=$(echo "$BEFORE" | jq -r '.uri_allow_list // ""')
+          MERGED="$CURRENT"
+          for u in "${WANT[@]}"; do
+            case ",$MERGED," in
+              *",$u,"*) ;;
+              *) MERGED="${MERGED:+$MERGED,}$u" ;;
+            esac
+          done
+          # Nettoyer virgules doubles / bords
+          MERGED=$(echo "$MERGED" | sed 's/^,//;s/,$//;s/,,*/,/g')
+
+          BODY=$(jq -n \
+            --arg site "https://mister-guiiug.github.io/miss-holi-voyage/" \
+            --arg list "$MERGED" \
+            '{site_url:$site, uri_allow_list:$list}')
+          AFTER=$(curl -fsS -X PATCH \
+            -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "$BODY" \
+            "$BASE")
+          echo "AFTER site_url=$(echo "$AFTER" | jq -r .site_url)"
+          echo "AFTER uri_allow_list=$(echo "$AFTER" | jq -r .uri_allow_list)"
