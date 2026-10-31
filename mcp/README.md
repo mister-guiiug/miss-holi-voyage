@@ -65,8 +65,22 @@ Cursor / Claude (stdio) :
 
 ## Horizon
 
-Pointer l’entrée `serveur.py:mcp` comme pour `mister-parc-mcp`. Authentification
-gateway Horizon ; ne pas exposer le magasin en lecture publique.
+En ligne : **`https://miss-holi-voyage-mcp.fastmcp.app/mcp`**
+(organisation [mister-guiiug](https://horizon.prefect.io/mister-guiiug/),
+projet `miss-holi-voyage-mcp`). Authentification gateway activée (OAuth ou
+Bearer `fmcp_…`).
+
+```bash
+claude mcp add --transport http miss-holi-voyage \
+  https://miss-holi-voyage-mcp.fastmcp.app/mcp
+```
+
+Déploiement initial : archive du dossier `mcp/` (entrypoint `serveur.py:mcp`,
+`pyproject.toml`). Le disque Horizon est éphémère entre requêtes — `VOYAGE_MCP_STORE`
+ne persiste pas durablement ; prévoir Supabase ensuite.
+
+Tableau de bord :
+`https://horizon.prefect.io/mister-guiiug/miss-holi-voyage-mcp`
 
 ## partir.com
 
