@@ -8,14 +8,11 @@ import { SkeletonGroup } from '@mister-guiiug/dev-pwa-config/react/skeleton';
 import { AppFooter } from '@mister-guiiug/dev-pwa-config/react/app-footer';
 import { useI18n } from '../../i18n/index.ts';
 import { REPO_URL } from '../../app/links.ts';
-import {
-  excursionTicketClass,
-  flightTicketClass,
-} from '../../entities/ticket-age.ts';
 import { normalizeInviteCode } from '../../entities/invite-code.ts';
 import { useVoyage } from './store.ts';
 import { InviteShare } from './InviteShare.tsx';
 import { MeridianField } from './MeridianField.tsx';
+import { FamilyMembersPanel } from './FamilyMembersPanel.tsx';
 
 /**
  * Accueil voyage : marque en héros, champ méridien, foyers et voyages.
@@ -36,10 +33,6 @@ export function HomeScreen() {
   const createTrip = useVoyage(s => s.createTrip);
 
   const [hhName, setHhName] = useState('');
-  const [memberName, setMemberName] = useState('');
-  const [memberBirth, setMemberBirth] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editBirth, setEditBirth] = useState('');
   const [tripTitle, setTripTitle] = useState('');
   const [inviteToken, setInviteToken] = useState('');
   const [lastInvite, setLastInvite] = useState<{
@@ -148,119 +141,53 @@ export function HomeScreen() {
               <p className="text-muted mt-1 text-sm">
                 {householdMembers.length} {t('voyage.members')}
               </p>
-              <ul className="mt-3 flex flex-col gap-3 text-sm">
-                {householdMembers.map(m => {
-                  const flight = flightTicketClass(
-                    m.birthDate,
-                    ticketOn,
-                    m.ageBand
-                  );
-                  const excursion = excursionTicketClass(
-                    m.birthDate,
-                    ticketOn,
-                    m.ageBand
-                  );
-                  const open = editingId === m.id;
-                  return (
-                    <li key={m.id} className="border-border border-b pb-3">
-                      <button
-                        type="button"
-                        className="text-left font-medium underline-offset-2 hover:underline"
-                        onClick={() => {
-                          setEditingId(open ? null : m.id);
-                          setEditBirth(m.birthDate ?? '');
-                        }}
-                      >
-                        {m.displayName}{' '}
-                        <span className="text-muted font-normal">
-                          ({m.ageBand}
-                          {m.birthDate ? ` · ${m.birthDate}` : ''})
-                        </span>
-                      </button>
-                      <p className="text-muted mt-1 text-xs">
-                        {t('voyage.flightClass')}: {flight} ·{' '}
-                        {t('voyage.excursionClass')}: {excursion}
-                      </p>
-                      {open ? (
-                        <form
-                          className="mt-2 flex flex-wrap items-end gap-2"
-                          onSubmit={e => {
-                            e.preventDefault();
-                            void updateMember(m.id, {
-                              birthDate: editBirth.trim() || null,
-                            });
-                            setEditingId(null);
+              <div className="mt-4">
+                <FamilyMembersPanel
+                  members={householdMembers}
+                  ticketOn={ticketOn}
+                  onAdd={input => {
+                    void addMember(currentHousehold.id, input.displayName, {
+                      birthDate: input.birthDate,
+                      gender: input.gender,
+                      interests: input.interests,
+                    });
+                  }}
+                  onUpdate={(id, patch) => {
+                    void updateMember(id, patch);
+                  }}
+                  inviteSlot={
+                    <>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          disabled={busy}
+                          onClick={() => {
+                            setBusy(true);
+                            void createInvite(currentHousehold.id)
+                              .then(inv =>
+                                setLastInvite({
+                                  code: inv.code,
+                                  expiresAt: inv.expiresAt,
+                                })
+                              )
+                              .finally(() => setBusy(false));
                           }}
                         >
-                          <TextField
-                            label={t('voyage.birthDate')}
-                            type="date"
-                            value={editBirth}
-                            onChange={e => setEditBirth(e.target.value)}
-                          />
-                          <Button type="submit" variant="secondary">
-                            {t('voyage.saveMember')}
-                          </Button>
-                        </form>
+                          {t('voyage.createInvite')}
+                        </Button>
+                      </div>
+                      {lastInvite ? (
+                        <InviteShare
+                          code={lastInvite.code}
+                          expiresAt={lastInvite.expiresAt}
+                          onClose={() => setLastInvite(null)}
+                        />
                       ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
-              <form
-                className="mt-4 flex flex-wrap items-end gap-2"
-                onSubmit={e => {
-                  e.preventDefault();
-                  if (!memberName.trim()) return;
-                  void addMember(currentHousehold.id, memberName.trim(), {
-                    birthDate: memberBirth.trim() || null,
-                  });
-                  setMemberName('');
-                  setMemberBirth('');
-                }}
-              >
-                <TextField
-                  label={t('voyage.memberName')}
-                  value={memberName}
-                  onChange={e => setMemberName(e.target.value)}
+                    </>
+                  }
                 />
-                <TextField
-                  label={t('voyage.birthDate')}
-                  type="date"
-                  value={memberBirth}
-                  onChange={e => setMemberBirth(e.target.value)}
-                />
-                <Button type="submit" variant="secondary">
-                  {t('voyage.addMember')}
-                </Button>
-              </form>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={busy}
-                  onClick={() => {
-                    setBusy(true);
-                    void createInvite(currentHousehold.id)
-                      .then(inv =>
-                        setLastInvite({
-                          code: inv.code,
-                          expiresAt: inv.expiresAt,
-                        })
-                      )
-                      .finally(() => setBusy(false));
-                  }}
-                >
-                  {t('voyage.createInvite')}
-                </Button>
               </div>
-              {lastInvite ? (
-                <InviteShare
-                  code={lastInvite.code}
-                  expiresAt={lastInvite.expiresAt}
-                  onClose={() => setLastInvite(null)}
-                />
-              ) : null}
             </Card>
           </div>
 

@@ -41,6 +41,7 @@ export interface VoyageRepository {
         | 'displayName'
         | 'birthDate'
         | 'ageBand'
+        | 'gender'
         | 'mobilityNotes'
         | 'foodNotes'
         | 'sleepNotes'

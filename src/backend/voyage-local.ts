@@ -161,6 +161,7 @@ export function createLocalVoyage(): VoyageRepository {
         ...member,
         id: createId('mem'),
         birthDate: member.birthDate ?? null,
+        gender: member.gender ?? 'unspecified',
         interests: member.interests ?? [],
         ageBand: member.ageBand ?? 'adult',
         mobilityNotes: member.mobilityNotes ?? '',

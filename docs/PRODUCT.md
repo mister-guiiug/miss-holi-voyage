@@ -24,8 +24,8 @@ décisions ni les brouillons structurés de l’IA.
 ## MCP distant
 
 Serveur FastMCP dans `mcp/` : une IA complémentaire peut lire/écrire foyers,
-voyageurs (dates de naissance → classes billet), voyages et propositions de
-destinations. Voir `mcp/README.md`.
+voyageurs (naissance → classes billet, sexe, centres d’intérêt), voyages et
+propositions de destinations. Voir `mcp/README.md` et ADR 0014.
 
 ## Parcours
 
