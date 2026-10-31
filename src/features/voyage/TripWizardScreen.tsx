@@ -7,6 +7,7 @@ import { STEP_ORDER, ARTIFACT_TYPES_W2 } from '../../entities/schemas.ts';
 import { useI18n } from '../../i18n/index.ts';
 import { useVoyage } from './store.ts';
 import { StyleChoice } from './StyleChoice.tsx';
+import { DestinationStep } from './DestinationStep.tsx';
 import { VoyageSheet } from './VoyageSheet.tsx';
 
 export function TripWizardScreen() {
@@ -107,40 +108,29 @@ export function TripWizardScreen() {
       </header>
 
       <VoyageSheet title={t('voyage.step.destination')}>
-        <div className="flex flex-col gap-3">
-          <TextField
-            label={t('voyage.country')}
-            value={country}
-            onChange={e => setCountry(e.target.value)}
-          />
-          <TextField
-            label={t('voyage.region')}
-            value={region}
-            onChange={e => setRegion(e.target.value)}
-          />
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              onClick={() => {
-                void updateTrip(trip.id, {
-                  destinationCountry: country.trim(),
-                  destinationRegion: region.trim(),
-                }).then(() => setStepStatus(trip.id, 'destination', 'ready'));
-              }}
-            >
-              {t('voyage.markReady')}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() =>
-                void setStepStatus(trip.id, 'destination', 'locked')
-              }
-            >
-              {t('voyage.lock')}
-            </Button>
-          </div>
-        </div>
+        <DestinationStep
+          country={country}
+          region={region}
+          dateStart={dateStart || trip.dateWindowStart || undefined}
+          onCountryChange={setCountry}
+          onRegionChange={setRegion}
+          onPick={dest => {
+            setCountry(dest.country);
+            setRegion(dest.region || dest.name);
+            void updateTrip(trip.id, {
+              destinationCountry: dest.country,
+              destinationRegion: dest.region || dest.name,
+              destinationNotes: `${dest.summary}\nSource: ${dest.sourceUrl}`,
+            });
+          }}
+          onMarkReady={() => {
+            void updateTrip(trip.id, {
+              destinationCountry: country.trim(),
+              destinationRegion: region.trim(),
+            }).then(() => setStepStatus(trip.id, 'destination', 'ready'));
+          }}
+          onLock={() => void setStepStatus(trip.id, 'destination', 'locked')}
+        />
       </VoyageSheet>
 
       <VoyageSheet title={t('voyage.step.specs')}>
