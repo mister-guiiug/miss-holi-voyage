@@ -1469,11 +1469,16 @@ export function proposeDestinations(options?: {
   return out;
 }
 
+/** Groupement milliers stable (évite `1,100` en-US vs `1 100` fr sur la CI). */
+function formatBudgetEur(n: number): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f');
+}
+
 /** Ligne méta enrichie (budget · jours · vol). */
 export function destinationMetaLine(dest: Destination): string {
   const parts: string[] = [];
   if (dest.budgetFromEur != null) {
-    parts.push(`À partir de ${dest.budgetFromEur.toLocaleString()} €`);
+    parts.push(`À partir de ${formatBudgetEur(dest.budgetFromEur)} €`);
   }
   if (dest.daysTypical != null) {
     parts.push(`${dest.daysTypical} jours`);

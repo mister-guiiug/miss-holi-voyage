@@ -18,6 +18,13 @@ const log = createLogger('supabase');
  * `undefined`, et c'est ce que l'écran de réglages affiche.
  */
 export const supabase = createSupabaseClientFactory<SupabaseLike>({
+  // L'ENVIRONNEMENT SE DONNE : `import.meta.env` n'est remplacé par Vite que
+  // dans le code de l'application, pas dans le socle. Sans lui, `getClient()`
+  // dit « configuration manquante » alors que les variables sont dans le
+  // bundle — l'écran Compte affiche le formulaire (le sélecteur de backend
+  // lit bien l'env) mais connexion et déconnexion échouent. Même piège que
+  // mister-settle le 07/09/2026.
+  env: import.meta.env,
   // `flowType: 'pkce'` N'EST PAS UN RÉGLAGE DE SÉCURITÉ ICI, C'EST UNE
   // NÉCESSITÉ DE ROUTAGE. La connexion par lien renvoie, en flux implicite,
   // le jeton dans le FRAGMENT (`#access_token=…`) — l'endroit exact où un
@@ -27,7 +34,9 @@ export const supabase = createSupabaseClientFactory<SupabaseLike>({
   // squelette route par chemin (ADR 0001) et n'en souffrirait pas ; il le
   // pose quand même, parce que neuf applications de la famille routent par
   // `#` et que ce fichier part chez elles. Mister-miss-koh l'a payé.
-  auth: { flowType: 'pkce' },
+  // `detectSessionInUrl` : échange le `?code=` du retour magique contre une
+  // session (lookhouse / lien OTP).
+  auth: { detectSessionInUrl: true, flowType: 'pkce' },
 });
 
 /** Le strict nécessaire du client, pour ne pas figer une version du SDK. */

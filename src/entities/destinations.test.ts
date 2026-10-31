@@ -45,7 +45,7 @@ describe('destinations (partir.com embarqué)', () => {
     expect(egy.some(d => d.id === 'egypte')).toBe(true);
     const egypte = getDestination('egypte');
     expect(egypte?.places).toContain('Louxor');
-    expect(destinationMetaLine(egypte!)).toMatch(/1[\s\u202f]?100|1100/);
+    expect(destinationMetaLine(egypte!)).toMatch(/1\u202f100/);
     expect(destinationMetaLine(egypte!)).toContain('Vol 4h30');
 
     const crete = searchDestinations('crète');
