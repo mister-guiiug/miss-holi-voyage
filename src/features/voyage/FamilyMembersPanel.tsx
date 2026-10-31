@@ -88,24 +88,22 @@ export function FamilyMembersPanel({
 
           return (
             <li key={m.id} className="voyage-member">
-              <div className="flex items-start gap-3">
+              <div className="voyage-member__row">
                 <MemberAvatar
                   displayName={m.displayName}
                   ageBand={m.ageBand}
                   gender={gender}
                   className="voyage-member__avatar"
                 />
-                <div className="min-w-0 flex-1">
+                <div className="voyage-member__body">
                   <button
                     type="button"
                     className="voyage-member__open"
                     aria-expanded={open}
                     onClick={() => (open ? setEditingId(null) : openEdit(m))}
                   >
-                    <span className="voyage-member__name block">
-                      {m.displayName}
-                    </span>
-                    <span className="text-muted text-sm font-normal">
+                    <span className="voyage-member__name">{m.displayName}</span>
+                    <span className="voyage-member__meta">
                       {t(`voyage.ageBandOption.${m.ageBand}`)}
                       {m.birthDate ? ` · ${m.birthDate}` : ''}
                       {gender !== 'unspecified'
@@ -113,7 +111,7 @@ export function FamilyMembersPanel({
                         : ''}
                     </span>
                   </button>
-                  <p className="text-muted mt-1 text-xs">
+                  <p className="voyage-member__tickets">
                     {t('voyage.flightClass')}:{' '}
                     {t(`voyage.ticketClass.${flight}`)} ·{' '}
                     {t('voyage.excursionClass')}:{' '}

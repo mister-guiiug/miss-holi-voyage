@@ -524,7 +524,25 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
   border-bottom: 0;
 }
 
+.voyage-member__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.voyage-member__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .voyage-member__open {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
   margin: 0;
   padding: 0;
   border: 0;
@@ -540,13 +558,34 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
 }
 
 .voyage-member__name {
+  display: block;
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 1.1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.voyage-member__meta,
+.voyage-member__tickets {
+  display: block;
+  margin: 0;
+  color: var(--dwc-text-soft);
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.voyage-member__tickets {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
 }
 
 .voyage-member__avatar {
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
 }
 
 .voyage-member__tags {
@@ -1085,7 +1124,6 @@ html[data-voyage-theme='instrument'] .voyage-trip-hero__cta {
 html[data-voyage-theme='instrument'] .voyage-member {
   padding: 0.65rem 0.5rem;
   border-bottom: 1px solid var(--dwc-border);
-  display: block;
 }
 
 html[data-voyage-theme='instrument'] .voyage-member__name {
@@ -1093,7 +1131,7 @@ html[data-voyage-theme='instrument'] .voyage-member__name {
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 html[data-voyage-theme='instrument'] .voyage-member__tags {
@@ -1209,4 +1247,142 @@ html[data-voyage-theme='instrument'] .voyage-invite-code {
   font-size: 1.5rem;
   letter-spacing: 0.28em;
   text-align: center;
+}
+
+/* —— Destination (suggestions partir.com) —— */
+
+.voyage-destination__country-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.65rem;
+}
+
+.voyage-destination__flag {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.15rem;
+  font-size: 1.65rem;
+  line-height: 1;
+  border: 1px solid var(--voyage-ink-faint);
+  border-radius: var(--radius-card);
+  background: var(--dwc-surface);
+}
+
+.voyage-destination__flag--empty {
+  font-size: 0.85rem;
+  color: var(--dwc-text-soft);
+  letter-spacing: 0.08em;
+}
+
+.voyage-destination__field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.voyage-destination__suggest-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dwc-text-soft);
+  margin-bottom: 0.65rem;
+}
+
+.voyage-destination__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--voyage-ink-faint);
+}
+
+.voyage-destination__chip {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.75rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--voyage-ink-faint);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.voyage-destination__chip:hover .voyage-destination__chip-name {
+  color: var(--voyage-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.voyage-destination__chip-flag {
+  flex: 0 0 auto;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  width: 1.75rem;
+  text-align: center;
+}
+
+.voyage-destination__chip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.voyage-destination__chip-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.voyage-destination__chip-meta {
+  font-size: 0.8rem;
+  color: var(--dwc-text-soft);
+}
+
+.voyage-destination__attribution {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--dwc-text-soft);
+}
+
+html[data-voyage-theme='album'] .voyage-destination__list {
+  border: 0;
+  gap: 0.4rem;
+}
+
+html[data-voyage-theme='album'] .voyage-destination__chip {
+  padding: 0.85rem 1rem;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: var(--dwc-surface);
+}
+
+html[data-voyage-theme='instrument'] .voyage-destination__list {
+  border: 1px solid var(--dwc-border-strong);
+}
+
+html[data-voyage-theme='instrument'] .voyage-destination__chip {
+  padding: 0.55rem 0.65rem;
+  border-bottom-color: var(--dwc-border);
+}
+
+html[data-voyage-theme='instrument'] .voyage-destination__chip-name {
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+html[data-voyage-theme='instrument'] .voyage-destination__flag {
+  border-radius: 0;
+  border-color: var(--dwc-border-strong);
 }
