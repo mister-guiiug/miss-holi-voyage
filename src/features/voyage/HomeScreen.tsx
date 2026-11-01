@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
@@ -10,6 +9,7 @@ import { REPO_URL } from '../../app/links.ts';
 import { normalizeInviteCode } from '../../entities/invite-code.ts';
 import { useVoyage } from './store.ts';
 import { VoyageAtmosphere } from './VoyageAtmosphere.tsx';
+import { VoyageLink } from './VoyageLink.tsx';
 import { VoyageRule } from './VoyageSheet.tsx';
 
 /**
@@ -116,15 +116,15 @@ export function HomeScreen() {
               <Button type="submit" variant="secondary" disabled={busy}>
                 {t('voyage.acceptInvite')}
               </Button>
-              <Link to="/rejoindre" className="voyage-ink-link text-sm">
+              <VoyageLink to="/rejoindre" className="voyage-ink-link text-sm">
                 {t('voyage.joinTitle')}
-              </Link>
+              </VoyageLink>
             </form>
           </EmptyState>
         </div>
       ) : (
         <>
-          <Link
+          <VoyageLink
             to="/foyer"
             className="voyage-hh-teaser voyage-rise voyage-rise-delay-1"
           >
@@ -134,7 +134,7 @@ export function HomeScreen() {
             <span className="text-muted text-sm">
               {memberCount} {t('voyage.members')} — {t('voyage.openHousehold')}
             </span>
-          </Link>
+          </VoyageLink>
 
           <section className="voyage-rise voyage-rise-delay-2">
             {householdTrips.length === 0 ? (
@@ -166,7 +166,7 @@ export function HomeScreen() {
               <>
                 {currentTrip ? (
                   <article className="voyage-trip-hero">
-                    <Link
+                    <VoyageLink
                       to={`/voyage/${currentTrip.id}`}
                       className="voyage-trip-hero__link"
                     >
@@ -186,7 +186,7 @@ export function HomeScreen() {
                       <span className="voyage-trip-hero__cta">
                         {t('voyage.continueTrip')}
                       </span>
-                    </Link>
+                    </VoyageLink>
                   </article>
                 ) : null}
 
@@ -197,7 +197,7 @@ export function HomeScreen() {
                         key={tr.id}
                         className="voyage-trip-hero voyage-trip-hero--secondary"
                       >
-                        <Link
+                        <VoyageLink
                           to={`/voyage/${tr.id}`}
                           className="voyage-trip-hero__link"
                         >
@@ -213,7 +213,7 @@ export function HomeScreen() {
                               ? ` · ${t(`voyage.styleLabel.${tr.style}`)}`
                               : ''}
                           </span>
-                        </Link>
+                        </VoyageLink>
                       </li>
                     ))}
                   </ul>

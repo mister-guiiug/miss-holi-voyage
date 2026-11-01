@@ -54,7 +54,7 @@ export function InviteShare({
   }, [shareUrl]);
 
   return (
-    <div className="voyage-invite-panel">
+    <div className="voyage-invite-panel voyage-rise">
       {inviteIsLocalOnly ? (
         <p role="status" className="voyage-invite-warn m-0 text-sm">
           {t('voyage.inviteLocalOnly')}
