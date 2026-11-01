@@ -336,8 +336,46 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
   }
 }
 
+@keyframes voyage-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.55rem);
+    filter: blur(1.5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes voyage-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.65rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes voyage-vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-0.3rem) scale(0.994);
+  }
+}
+
+@keyframes voyage-vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem) scale(0.994);
+  }
+}
+
 .voyage-rise {
-  animation: voyage-rise 0.45s ease-out both;
+  animation: voyage-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .voyage-rise-delay-1 {
@@ -350,11 +388,64 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
   animation-delay: 120ms;
 }
 
+/* Entrée de page (rejouée à chaque chemin via PageMotion). */
+.voyage-page {
+  animation: voyage-page-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Feuillets du carnet : cascade légère dans le wizard. */
+.voyage-shell > .voyage-sheet {
+  animation: voyage-sheet-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.voyage-shell > .voyage-sheet:nth-of-type(1) {
+  animation-delay: 30ms;
+}
+.voyage-shell > .voyage-sheet:nth-of-type(2) {
+  animation-delay: 70ms;
+}
+.voyage-shell > .voyage-sheet:nth-of-type(3) {
+  animation-delay: 110ms;
+}
+.voyage-shell > .voyage-sheet:nth-of-type(4) {
+  animation-delay: 150ms;
+}
+.voyage-shell > .voyage-sheet:nth-of-type(5) {
+  animation-delay: 190ms;
+}
+.voyage-shell > .voyage-sheet:nth-of-type(6) {
+  animation-delay: 230ms;
+}
+.voyage-shell > .voyage-sheet:nth-of-type(7) {
+  animation-delay: 270ms;
+}
+
+/* Fondus croisés navigateur (Chrome / Edge / Safari récents). */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 320ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  ::view-transition-old(root) {
+    animation-name: voyage-vt-out;
+  }
+  ::view-transition-new(root) {
+    animation-name: voyage-vt-in;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .voyage-meridian__arcs,
   .voyage-waypoint,
-  .voyage-rise {
+  .voyage-rise,
+  .voyage-page,
+  .voyage-shell > .voyage-sheet {
     animation: none;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
   }
 }
 
@@ -432,6 +523,10 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
   background: var(--dwc-surface);
   color: var(--dwc-text-soft);
   white-space: nowrap;
+  transition:
+    color 0.28s ease,
+    background-color 0.28s ease,
+    border-color 0.28s ease;
 }
 
 .voyage-step-badge__prefix {
@@ -875,16 +970,23 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
   gap: 0.35rem 0.45rem;
   font-size: 0.8rem;
   color: var(--dwc-text-soft);
+  transition:
+    color 0.28s ease,
+    opacity 0.28s ease;
 }
 
 .voyage-step-rail__num {
   font-variant-numeric: tabular-nums;
   color: var(--dwc-text);
   font-weight: 600;
+  transition: color 0.28s ease;
 }
 
 .voyage-step-rail__label {
   color: var(--dwc-text);
+  transition:
+    color 0.28s ease,
+    font-weight 0.28s ease;
 }
 
 .voyage-step-rail__item--ready .voyage-step-rail__num {
@@ -934,8 +1036,13 @@ html[data-voyage-theme='instrument'] .voyage-atmosphere {
 
 @media (prefers-reduced-motion: reduce) {
   .voyage-member-add--open,
-  .voyage-trip-hero {
+  .voyage-trip-hero,
+  .voyage-step-badge,
+  .voyage-step-rail__item,
+  .voyage-step-rail__num,
+  .voyage-step-rail__label {
     animation: none;
+    transition: none;
   }
 }
 

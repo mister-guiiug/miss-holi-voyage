@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { VoyageLink } from './VoyageLink.tsx';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { EmptyState } from '@mister-guiiug/dev-pwa-config/react/empty-state';
@@ -81,12 +81,12 @@ export function HouseholdScreen() {
               {t('voyage.createHousehold')}
             </Button>
           </form>
-          <Link
+          <VoyageLink
             to="/rejoindre"
             className="voyage-ink-link mt-4 inline-block text-sm"
           >
             {t('voyage.joinTitle')}
-          </Link>
+          </VoyageLink>
         </EmptyState>
       </div>
     );
@@ -205,9 +205,9 @@ export function HouseholdScreen() {
       </VoyageSheet>
 
       <p className="voyage-rise voyage-rise-delay-2 py-4 text-sm">
-        <Link to="/" className="voyage-ink-link">
+        <VoyageLink to="/" className="voyage-ink-link">
           {t('voyage.backToTrips')}
-        </Link>
+        </VoyageLink>
       </p>
     </div>
   );

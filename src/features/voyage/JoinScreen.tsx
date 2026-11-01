@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { useAuthContext } from '@mister-guiiug/dev-pwa-config/react/auth-provider';
@@ -7,6 +7,7 @@ import { useI18n } from '../../i18n/index.ts';
 import { coverage } from '../../backend/index.ts';
 import { normalizeInviteCode } from '../../entities/invite-code.ts';
 import { useVoyage } from './store.ts';
+import { VoyageLink } from './VoyageLink.tsx';
 import { VoyageSheet } from './VoyageSheet.tsx';
 
 function mapInviteError(cause: unknown, needSignIn: string, invalid: string) {
@@ -54,7 +55,7 @@ export function JoinScreen() {
     setError(null);
     try {
       await acceptInvite(normalized);
-      navigate('/', { replace: true });
+      navigate('/', { replace: true, viewTransition: true });
     } catch (cause) {
       setError(
         mapInviteError(
@@ -82,7 +83,7 @@ export function JoinScreen() {
       setError(null);
       try {
         await acceptInvite(normalized);
-        if (!cancelled) navigate('/', { replace: true });
+        if (!cancelled) navigate('/', { replace: true, viewTransition: true });
       } catch (cause) {
         if (!cancelled) {
           setError(
@@ -124,9 +125,9 @@ export function JoinScreen() {
           <p role="alert" className="text-danger m-0 text-sm">
             {error}{' '}
             {error === t('voyage.inviteNeedSignIn') ? (
-              <Link to="/compte" className="voyage-ink-link">
+              <VoyageLink to="/compte" className="voyage-ink-link">
                 {t('nav.account')}
-              </Link>
+              </VoyageLink>
             ) : null}
           </p>
         ) : null}
@@ -136,9 +137,9 @@ export function JoinScreen() {
         >
           {t('voyage.acceptInvite')}
         </Button>
-        <Link to="/" className="voyage-ink-link text-sm">
+        <VoyageLink to="/" className="voyage-ink-link text-sm">
           {t('voyage.backHome')}
-        </Link>
+        </VoyageLink>
       </form>
     </VoyageSheet>
   );

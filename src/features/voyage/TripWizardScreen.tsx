@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { VoyageLink } from './VoyageLink.tsx';
 import { Button } from '@mister-guiiug/dev-pwa-config/react/button';
 import { TextField } from '@mister-guiiug/dev-pwa-config/react/field';
 import { SkeletonGroup } from '@mister-guiiug/dev-pwa-config/react/skeleton';
@@ -75,9 +76,9 @@ export function TripWizardScreen() {
     return (
       <p>
         {t('voyage.tripMissing')}{' '}
-        <Link to="/" className="voyage-ink-link">
+        <VoyageLink to="/" className="voyage-ink-link">
           {t('voyage.backHome')}
-        </Link>
+        </VoyageLink>
       </p>
     );
   }

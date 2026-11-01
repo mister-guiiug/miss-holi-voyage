@@ -1,10 +1,4 @@
-import {
-  BrowserRouter,
-  Link,
-  Route,
-  Routes,
-  useLocation,
-} from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { Home, Info, Settings, UserRound, Users } from 'lucide-react';
 import { AppShell } from '@mister-guiiug/dev-pwa-config/react/app-shell';
 import { ObservabilityBoundary } from '@mister-guiiug/dev-pwa-config/react/error-boundary';
@@ -17,7 +11,9 @@ import { useI18n } from './i18n/index.ts';
 import { HomeScreen } from './features/voyage/HomeScreen.tsx';
 import { HouseholdScreen } from './features/voyage/HouseholdScreen.tsx';
 import { JoinScreen } from './features/voyage/JoinScreen.tsx';
+import { PageMotion } from './features/voyage/PageMotion.tsx';
 import { TripWizardScreen } from './features/voyage/TripWizardScreen.tsx';
+import { VoyageLink } from './features/voyage/VoyageLink.tsx';
 import { useSolarPhase } from './features/voyage/useSolarPhase.ts';
 import { SettingsScreen } from './features/settings/SettingsScreen.tsx';
 import { AboutScreen } from './features/about/AboutScreen.tsx';
@@ -124,7 +120,7 @@ export function Shell() {
             : (titles[pathname] ?? t('app.name'))
       }
       backHref={pathname === '/' ? undefined : '/'}
-      linkComponent={Link}
+      linkComponent={VoyageLink}
       hrefProp="to"
       navItems={nav}
       navCurrentPath={pathname}
@@ -169,21 +165,23 @@ export function Shell() {
         />
       }
     >
-      <Routes>
-        <Route path="/" element={<HomeScreen />} />
-        <Route path="/foyer" element={<HouseholdScreen />} />
-        <Route path="/voyage/:tripId" element={<TripWizardScreen />} />
-        <Route path="/rejoindre" element={<JoinScreen />} />
-        <Route path="/rejoindre/:code" element={<JoinScreen />} />
-        <Route path="/reglages" element={<SettingsScreen />} />
-        <Route path="/compte" element={<AccountScreen />} />
-        <Route path="/a-propos" element={<AboutScreen />} />
-        {/* Le repli de route rend l'accueil ; le repli de SERVEUR est le
-            `404.html` posé par `spaFallbackPlugin`. Les deux sont
-            nécessaires : sans le second, GitHub Pages sert sa propre page
-            d'erreur avant que ce routeur n'existe. */}
-        <Route path="*" element={<HomeScreen />} />
-      </Routes>
+      <PageMotion>
+        <Routes>
+          <Route path="/" element={<HomeScreen />} />
+          <Route path="/foyer" element={<HouseholdScreen />} />
+          <Route path="/voyage/:tripId" element={<TripWizardScreen />} />
+          <Route path="/rejoindre" element={<JoinScreen />} />
+          <Route path="/rejoindre/:code" element={<JoinScreen />} />
+          <Route path="/reglages" element={<SettingsScreen />} />
+          <Route path="/compte" element={<AccountScreen />} />
+          <Route path="/a-propos" element={<AboutScreen />} />
+          {/* Le repli de route rend l'accueil ; le repli de SERVEUR est le
+              `404.html` posé par `spaFallbackPlugin`. Les deux sont
+              nécessaires : sans le second, GitHub Pages sert sa propre page
+              d'erreur avant que ce routeur n'existe. */}
+          <Route path="*" element={<HomeScreen />} />
+        </Routes>
+      </PageMotion>
     </AppShell>
   );
 }
