@@ -336,11 +336,13 @@ export function createSupabaseVoyage(
           if (error) throw new Error(error.message);
           const payload = data as {
             token: string;
+            /** Code court XXXX-XXXX (migration 0012) ; repli jeton si vieux RPC. */
+            code?: string;
             expires_at: string;
           };
           return {
             token: payload.token,
-            code: payload.token,
+            code: payload.code?.trim() || payload.token,
             expiresAt: payload.expires_at,
           };
         },
