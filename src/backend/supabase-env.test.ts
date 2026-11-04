@@ -1,30 +1,40 @@
-import { describe, expect, it } from 'vitest';
-import { createSupabaseClientFactory } from '@mister-guiiug/dev-pwa-config/supabase-client';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 /**
- * Sans `env: import.meta.env`, la fabrique lit `{}` et `getClient()` échoue
- * alors que le sélecteur de backend (qui lit l'env Vite) croit le mode distant
- * prêt — connexion / déconnexion cassées. Relevé sur miss-holi-voyage ; le
- * même commentaire vit dans mister-settle (07/09/2026).
+ * La fabrique Supabase de l'application lit-elle l'environnement Vite ?
+ *
+ * Jusqu'au socle 6.28.4, la fabrique lisait `{}` quand on ne lui passait pas
+ * `env` : l'écran Compte affichait le formulaire, puis connexion et
+ * déconnexion échouaient sur « configuration manquante », alors que les
+ * variables étaient dans le bundle (relevé ici et sur mister-settle). Le socle
+ * lit désormais l'environnement Vite seul (dev-pwa-config#482), mais pas sous
+ * Vitest, qui l'exécute sans Vite. Ce test importe donc le VRAI module, avec
+ * des variables posées par `vi.stubEnv`, et exige qu'il les ait lues.
  */
-describe('fabrique Supabase et environnement Vite', () => {
-  it('sans env, getClient refuse — piège du squelette', async () => {
-    const factory = createSupabaseClientFactory({ auth: { flowType: 'pkce' } });
-    expect(factory.isConfigured()).toBe(false);
-    await expect(factory.getClient()).rejects.toThrow(
-      /configuration manquante/
-    );
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.resetModules();
+});
+
+describe('la fabrique Supabase de l’application', () => {
+  it('lit VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY', async () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://exemple.supabase.co');
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'cle-anon-de-test');
+    vi.resetModules();
+    const { supabase } = await import('./supabase.ts');
+    expect(supabase.missing()).toEqual([]);
+    expect(supabase.isConfigured()).toBe(true);
   });
 
-  it('avec env renseigné, isConfigured passe', () => {
-    const factory = createSupabaseClientFactory({
-      env: {
-        VITE_SUPABASE_URL: 'https://exemple.supabase.co',
-        VITE_SUPABASE_ANON_KEY: 'cle-anon-de-test',
-      },
-      auth: { flowType: 'pkce' },
-    });
-    expect(factory.isConfigured()).toBe(true);
-    expect(factory.missing()).toEqual([]);
+  it('dit ce qui manque quand les variables sont absentes', async () => {
+    vi.stubEnv('VITE_SUPABASE_URL', '');
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', '');
+    vi.resetModules();
+    const { supabase } = await import('./supabase.ts');
+    expect(supabase.isConfigured()).toBe(false);
+    expect(supabase.missing()).toEqual([
+      'VITE_SUPABASE_URL',
+      'VITE_SUPABASE_ANON_KEY',
+    ]);
   });
 });

@@ -18,12 +18,14 @@ const log = createLogger('supabase');
  * `undefined`, et c'est ce que l'écran de réglages affiche.
  */
 export const supabase = createSupabaseClientFactory<SupabaseLike>({
-  // L'ENVIRONNEMENT SE DONNE : `import.meta.env` n'est remplacé par Vite que
-  // dans le code de l'application, pas dans le socle. Sans lui, `getClient()`
-  // dit « configuration manquante » alors que les variables sont dans le
-  // bundle — l'écran Compte affiche le formulaire (le sélecteur de backend
-  // lit bien l'env) mais connexion et déconnexion échouent. Même piège que
-  // mister-settle le 07/09/2026.
+  // L'ENVIRONNEMENT SE DONNE. Jusqu'au socle 6.28.4, la fabrique lisait `{}`
+  // sans lui : `getClient()` disait « configuration manquante » alors que les
+  // variables étaient dans le bundle ; l'écran Compte affichait le formulaire
+  // (le sélecteur de backend lit bien l'env), mais connexion et déconnexion
+  // échouaient. Même piège que mister-settle le 07/09/2026. Le socle lit
+  // désormais l'environnement Vite seul (dev-pwa-config#482) ; le passer reste
+  // utile aux tests : Vitest exécute le socle sans Vite, et `vi.stubEnv` agit
+  // sur ce `import.meta.env`-ci (voir supabase-env.test.ts).
   env: import.meta.env,
   // `flowType: 'pkce'` N'EST PAS UN RÉGLAGE DE SÉCURITÉ ICI, C'EST UNE
   // NÉCESSITÉ DE ROUTAGE. La connexion par lien renvoie, en flux implicite,
