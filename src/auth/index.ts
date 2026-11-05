@@ -11,13 +11,12 @@ import {
   supabaseAuthAdapter,
   type SupabaseAuthAdapter,
 } from '@mister-guiiug/dev-pwa-config/auth/supabase';
-import {
-  navigateurHorsLigne,
-  storedSupabaseSession,
-} from '@mister-guiiug/dev-pwa-config/auth/stored-session';
+import { navigateurHorsLigne } from '@mister-guiiug/dev-pwa-config/auth/stored-session';
 import { useAuthContext } from '@mister-guiiug/dev-pwa-config/react/auth-provider';
 import { supabase } from '../backend/supabase.ts';
 import { coverage } from '../backend/index.ts';
+import { purgerCopies } from '../backend/dernier-etat.ts';
+import { identifiantRange } from '../backend/session.ts';
 
 type AuthApi = SupabaseClient['auth'];
 
@@ -70,9 +69,19 @@ function sdkALaDemande(): { auth: object } {
     /**
      * Toujours locale : la globale exige le réseau et laisse la session
      * ouverte hors ligne. Même contrainte que `delete-account.ts`.
+     *
+     * Et elle emporte les copies hors ligne du foyer et des notes (ADR
+     * 0016) : sur un appareil partagé, le compte suivant ne doit pas les
+     * relire. L'évènement `SIGNED_OUT` purge aussi, mais il n'arrive qu'à un
+     * abonné — le geste explicite ne dépend pas de lui.
      */
-    signOut: async (opts?: { scope?: 'local' | 'global' }) =>
-      (await apiAuth()).signOut({ ...opts, scope: 'local' }),
+    signOut: async (opts?: { scope?: 'local' | 'global' }) => {
+      const issue = await (
+        await apiAuth()
+      ).signOut({ ...opts, scope: 'local' });
+      await purgerCopies();
+      return issue;
+    },
   };
   return { auth };
 }
@@ -80,17 +89,28 @@ function sdkALaDemande(): { auth: object } {
 /**
  * Hors ligne, un `SIGNED_OUT` sans session effacée du stockage n’est PAS une
  * déconnexion réelle (renouvellement de jeton abandonné) — on l’ignore.
+ *
+ * LA SESSION DE CE PROJET, PAS CELLE D'UNE SŒUR : `storedSupabaseSession()`
+ * du socle rend la première case `sb-*-auth-token` venue, et la famille
+ * partage une origine. Une vraie déconnexion hors ligne était ignorée dès
+ * qu'une autre app du parc avait une session sur l'appareil.
+ *
+ * Une déconnexion RÉELLE — geste, jeton révoqué, compte supprimé — purge les
+ * copies hors ligne (ADR 0016).
+ *
+ * Exporté pour `index.test.tsx`.
  */
-function avecLaGardeHorsLigne(
+export function avecLaGardeHorsLigne(
   adaptateur: SupabaseAuthAdapter
 ): SupabaseAuthAdapter {
   return {
     ...adaptateur,
     onAuthStateChange: callback =>
       adaptateur.onAuthStateChange((event, session) => {
-        if (!session && navigateurHorsLigne() && storedSupabaseSession()) {
+        if (!session && navigateurHorsLigne() && identifiantRange()) {
           return;
         }
+        if (event === 'SIGNED_OUT') void purgerCopies();
         callback(event, session);
       }),
   };

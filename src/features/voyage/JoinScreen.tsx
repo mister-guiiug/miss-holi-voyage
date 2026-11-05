@@ -6,11 +6,19 @@ import { useAuthContext } from '@mister-guiiug/dev-pwa-config/react/auth-provide
 import { useI18n } from '../../i18n/index.ts';
 import { coverage } from '../../backend/index.ts';
 import { normalizeInviteCode } from '../../entities/invite-code.ts';
+import { HorsLigneError } from '../../backend/dernier-etat.ts';
 import { useVoyage } from './store.ts';
 import { VoyageLink } from './VoyageLink.tsx';
 import { VoyageSheet } from './VoyageSheet.tsx';
 
-function mapInviteError(cause: unknown, needSignIn: string, invalid: string) {
+function mapInviteError(
+  cause: unknown,
+  needSignIn: string,
+  invalid: string,
+  offline: string
+) {
+  // Hors ligne n'est pas « invitation inconnue » : le code est peut-être bon.
+  if (cause instanceof HorsLigneError) return offline;
   const message = cause instanceof Error ? cause.message : String(cause);
   if (/session|connectez|sign in/i.test(message)) return needSignIn;
   return invalid;
@@ -61,7 +69,8 @@ export function JoinScreen() {
         mapInviteError(
           cause,
           t('voyage.inviteNeedSignIn'),
-          t('voyage.inviteInvalid')
+          t('voyage.inviteInvalid'),
+          t('voyage.offline.refused')
         )
       );
     } finally {
@@ -90,7 +99,8 @@ export function JoinScreen() {
             mapInviteError(
               cause,
               t('voyage.inviteNeedSignIn'),
-              t('voyage.inviteInvalid')
+              t('voyage.inviteInvalid'),
+              t('voyage.offline.refused')
             )
           );
         }

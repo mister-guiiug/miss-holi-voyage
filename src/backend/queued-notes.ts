@@ -5,7 +5,7 @@ import {
 import { createStore } from '@mister-guiiug/dev-pwa-config/storage';
 import { classifyBackendError } from '@mister-guiiug/dev-pwa-config/backend';
 import { createLogger } from '@mister-guiiug/dev-pwa-config/logger';
-import type { Note, NotesRepository } from './ports.ts';
+import type { Note, NotesRepository, NotesSnapshot } from './ports.ts';
 
 const log = createLogger('sync');
 
@@ -181,6 +181,36 @@ export function createQueuedNotes(
     ...(unschedule ? { clearTimeout: unschedule } : {}),
   });
 
+  /**
+   * CE QUE LA FILE PORTE ENCORE, POSÉ SUR CE QUE LE PORT A LU. Une note
+   * écrite hors ligne n'est pas sur le serveur, ni dans la copie de la
+   * dernière lecture : sans ce calque, relire la liste la ferait disparaître
+   * de l'écran jusqu'à son envoi — et une suppression en attente ferait
+   * réapparaître la note. Les lettres mortes n'y sont pas : la base les a
+   * refusées.
+   */
+  function avecLaFile(lu: NotesSnapshot): NotesSnapshot {
+    const retirees = new Set<string>();
+    const ajoutees = new Map<string, Note>();
+    for (const { payload } of queue.list()) {
+      if (payload.kind === 'add') {
+        ajoutees.set(payload.note.id, payload.note);
+        retirees.delete(payload.note.id);
+      } else {
+        retirees.add(payload.id);
+        ajoutees.delete(payload.id);
+      }
+    }
+    if (retirees.size === 0 && ajoutees.size === 0) return lu;
+    const notes = [
+      ...ajoutees.values(),
+      ...lu.notes.filter(n => !ajoutees.has(n.id)),
+    ]
+      .filter(n => !retirees.has(n.id))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return { notes };
+  }
+
   /** Le drain en cours — jamais attendu par `add`, observable par `drained`. */
   let drain: Promise<unknown> = Promise.resolve();
 
@@ -197,8 +227,11 @@ export function createQueuedNotes(
 
   const notes: NotesRepository = {
     // La LECTURE n'est pas mise en file : elle n'a rien à rejouer. Hors ligne,
-    // c'est le service worker qui répond, ou l'appel échoue et l'écran le dit.
-    load: () => inner.load(),
+    // AUCUN cache du service worker ne couvre Supabase (ce commentaire
+    // affirmait le contraire) : l'adaptateur ressert la dernière liste lue,
+    // datée (ADR 0016), et la file y pose ce qui attend encore. Sans copie,
+    // l'appel échoue et l'écran le dit — jamais une liste vide.
+    load: async () => avecLaFile(await inner.load()),
 
     add: async note => enfiler({ kind: 'add', note }),
     remove: async id => enfiler({ kind: 'remove', id }),

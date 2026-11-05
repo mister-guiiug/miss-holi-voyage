@@ -110,9 +110,10 @@ c'est le bon endroit.
 - **La file grossit dans le stockage.** Plafond à deux cents entrées (défaut du
   socle) ; au-delà, `enqueue` refuse et le magasin restaure l'état d'avant en
   portant l'erreur — refuser visiblement vaut mieux que jeter en silence.
-- **La lecture n'est pas mise en file.** Hors ligne, c'est le service worker qui
-  répond, ou l'appel échoue et l'écran le dit. Un cache de lecture est une autre
-  décision, que ce squelette ne prend pas.
+- **La lecture n'est pas mise en file.** Cette ligne disait qu'hors ligne « le
+  service worker répond » : c'était faux, aucun de ses caches ne couvre
+  Supabase, et les notes rendaient alors une liste vide. La lecture hors ligne
+  est une autre décision, prise par l'[ADR 0016](./0016-lire-hors-ligne.md).
 - Une application qui ajoute un port distant doit décider, port par port, ce qui
   s'enfile. La règle est écrite ici : ce qui nomme une ligne, oui ; ce qui
   remplace tout, non.
@@ -131,7 +132,7 @@ c'est le bon endroit.
   trancher **et l'écrire** — comme mister-doc, dont un créneau n'a qu'un
   occupant.
 - **Une file pour la lecture** (cache hors ligne). Mister-doc l'a
-  (`idbCache.ts`) ; c'est un autre problème, et le service worker en couvre
-  déjà l'essentiel ici.
+  (`idbCache.ts`) ; c'est un autre problème, que le service worker ne couvrait
+  pas — l'[ADR 0016](./0016-lire-hors-ligne.md) le tranche.
 - **Attendre le serveur avant d'afficher.** Ce serait rendre l'application
   local-first inutilement lente, et c'est déjà écarté par l'ADR 0002.

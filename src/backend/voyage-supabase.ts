@@ -1,6 +1,8 @@
-﻿import { createLogger } from '@mister-guiiug/dev-pwa-config/logger';
+﻿import type { IdbStore } from '@mister-guiiug/dev-pwa-config/idb';
+import { navigateurHorsLigne } from '@mister-guiiug/dev-pwa-config/auth/stored-session';
 import {
   emptyVoyageSnapshot,
+  voyageSnapshotSchema,
   type FlightOption,
   type Household,
   type HouseholdMember,
@@ -14,10 +16,9 @@ import {
   proposePois,
   suggestSpecQuestions,
 } from '../entities/ai-tools.ts';
-import { supabase } from './supabase.ts';
+import { sessionUserId, supabase } from './supabase.ts';
+import { avecDernierEtat, estCoupure, HorsLigneError } from './dernier-etat.ts';
 import type { VoyageRepository } from './voyage-ports.ts';
-
-const log = createLogger('voyage-supabase');
 
 /** Client PostgREST — typage lâche : le schéma SQL est la source de vérité. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,14 +26,6 @@ type Sb = any;
 
 async function client(): Promise<Sb> {
   return supabase.getClient();
-}
-
-async function sessionUserId(): Promise<string | null> {
-  const db = await client();
-  const {
-    data: { user },
-  } = await db.auth.getUser();
-  return user?.id ?? null;
 }
 
 async function requireUser(): Promise<string> {
@@ -244,36 +237,95 @@ async function loadRemote(): Promise<VoyageSnapshot> {
 }
 
 /**
+ * UNE ÉCRITURE DISTANTE, OU UN REFUS QUI SE NOMME (ADR 0016).
+ *
+ * Connecté et sans réseau, rien ne part : pas de file pour le voyage, et
+ * surtout pas de bascule dans le magasin de l'appareil, d'où ce qui y serait
+ * créé ne repartirait jamais. Le refus est une `HorsLigneError`, que l'écran
+ * reconnaît et dit avec ses mots. Une coupure EN COURS d'appel — navigateur
+ * « en ligne » derrière un portail captif — finit de la même façon.
+ */
+async function ecrire<T>(remote: () => Promise<T>): Promise<T> {
+  if (navigateurHorsLigne()) {
+    throw new HorsLigneError('hors ligne : modification du voyage refusée');
+  }
+  try {
+    return await remote();
+  } catch (cause) {
+    if (estCoupure(cause)) {
+      throw new HorsLigneError(
+        'réseau perdu : modification du voyage refusée',
+        {
+          cause,
+        }
+      );
+    }
+    throw cause;
+  }
+}
+
+/**
  * Port voyage distant (RLS + RPCs 0006). Sans session → magasin local.
+ *
+ * CONNECTÉ = TOUJOURS DISTANT. La session se lit sur l'appareil
+ * (`sessionUserId`), pas au serveur : hors ligne, un utilisateur connecté le
+ * reste. Il LIT la dernière copie de son foyer, datée (`avecDernierEtat`), et
+ * ses écritures sont REFUSÉES (`ecrire`) — le magasin local n'est que celui
+ * de la personne qui n'a pas de compte.
  */
 export function createSupabaseVoyage(
-  fallback: VoyageRepository
+  fallback: VoyageRepository,
+  options: { idb?: IdbStore } = {}
 ): VoyageRepository {
+  const lireVoyage = avecDernierEtat({
+    port: 'voyage',
+    schema: voyageSnapshotSchema,
+    lire: loadRemote,
+    idb: options.idb,
+  });
+
+  /** La lecture du connecté : le serveur, ou sa copie à lui. */
+  const lireConnecte = (uid: string) => lireVoyage(`voyage:${uid}`);
+
   const withSession = async <T>(
     remote: () => Promise<T>,
     local: () => Promise<T>
-  ): Promise<T> => ((await sessionUserId()) ? remote() : local());
+  ): Promise<T> => ((await sessionUserId()) ? ecrire(remote) : local());
+
+  /** Une LECTURE qui calcule (styles proposés, artefacts) : la copie suffit. */
+  const lecture = async <T>(
+    remote: (snap: VoyageSnapshot) => T,
+    local: () => Promise<T>
+  ): Promise<T> => {
+    const uid = await sessionUserId();
+    return uid ? remote(await lireConnecte(uid)) : local();
+  };
 
   return {
-    load: () => withSession(loadRemote, () => fallback.load()),
+    async load() {
+      const uid = await sessionUserId();
+      return uid ? lireConnecte(uid) : fallback.load();
+    },
 
     async clear() {
       await fallback.clear();
       const uid = await sessionUserId();
       if (!uid) return;
-      const db = await client();
-      const { data: owned, error } = await db
-        .from('household_memberships')
-        .select('household_id, role');
-      if (error) throw new Error(error.message);
-      for (const m of owned ?? []) {
-        if (m.role !== 'owner') continue;
-        const { error: del } = await db
-          .from('households')
-          .delete()
-          .eq('id', m.household_id);
-        if (del) throw new Error(del.message);
-      }
+      await ecrire(async () => {
+        const db = await client();
+        const { data: owned, error } = await db
+          .from('household_memberships')
+          .select('household_id, role');
+        if (error) throw new Error(error.message);
+        for (const m of owned ?? []) {
+          if (m.role !== 'owner') continue;
+          const { error: del } = await db
+            .from('households')
+            .delete()
+            .eq('id', m.household_id);
+          if (del) throw new Error(del.message);
+        }
+      });
     },
 
     async createHousehold(name, notes = '') {
@@ -350,20 +402,24 @@ export function createSupabaseVoyage(
       );
     },
 
+    /**
+     * UNE ERREUR RESTE UNE ERREUR. Le refus distant (code expiré, déjà
+     * utilisé, réseau) retombait sur le magasin local, qui ne connaît pas le
+     * code et répondait « invalide » — ou pire, rejoignait un foyer local
+     * qu'aucun autre membre ne voit.
+     */
     async acceptInvite(tokenOrCode) {
-      const uid = await sessionUserId();
-      if (!uid) return fallback.acceptInvite(tokenOrCode);
-      try {
-        const db = await client();
-        const { data, error } = await db.rpc('accept_invitation', {
-          p_token: tokenOrCode.trim(),
-        });
-        if (error) throw new Error(error.message);
-        return String((data as { household_id: string }).household_id);
-      } catch (cause) {
-        log.warn('accept distant échoué, essai local', { cause });
-        return fallback.acceptInvite(tokenOrCode);
-      }
+      return withSession(
+        async () => {
+          const db = await client();
+          const { data, error } = await db.rpc('accept_invitation', {
+            p_token: tokenOrCode.trim(),
+          });
+          if (error) throw new Error(error.message);
+          return String((data as { household_id: string }).household_id);
+        },
+        () => fallback.acceptInvite(tokenOrCode)
+      );
     },
 
     async addMember(member) {
@@ -634,9 +690,8 @@ export function createSupabaseVoyage(
     },
 
     async runProposeStyle(tripId) {
-      return withSession(
-        async () => {
-          const snap = await loadRemote();
+      return lecture(
+        snap => {
           const trip = snap.trips.find(t => t.id === tripId);
           if (!trip) throw new Error('voyage introuvable');
           const members = snap.members.filter(
@@ -725,11 +780,8 @@ export function createSupabaseVoyage(
     },
 
     async listArtifacts(tripId) {
-      return withSession(
-        async () => {
-          const snap = await loadRemote();
-          return snap.artifacts.filter(a => a.tripId === tripId);
-        },
+      return lecture(
+        snap => snap.artifacts.filter(a => a.tripId === tripId),
         () => fallback.listArtifacts(tripId)
       );
     },

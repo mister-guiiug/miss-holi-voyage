@@ -15,6 +15,7 @@ import { VoyageSheet } from './VoyageSheet.tsx';
 export function HouseholdScreen() {
   const { t } = useI18n();
   const ready = useVoyage(s => s.ready);
+  const unavailable = useVoyage(s => s.unavailable);
   const load = useVoyage(s => s.load);
   const households = useVoyage(s => s.households);
   const trips = useVoyage(s => s.trips);
@@ -52,6 +53,20 @@ export function HouseholdScreen() {
 
   if (!ready) {
     return <SkeletonGroup label={t('voyage.householdMenu')} lines={4} />;
+  }
+
+  // Non lu n'est pas inexistant : pas de formulaire de création ici.
+  if (unavailable && !current) {
+    return (
+      <EmptyState
+        title={t('voyage.unavailable')}
+        description={t('voyage.unavailableHint')}
+      >
+        <Button className="mt-4" onClick={() => void load()}>
+          {t('voyage.retry')}
+        </Button>
+      </EmptyState>
+    );
   }
 
   if (!current) {

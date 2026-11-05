@@ -1,6 +1,7 @@
 import { createLogger } from '@mister-guiiug/dev-pwa-config/logger';
 import { supabase } from '../../backend/supabase.ts';
 import { notesStore } from '../../backend/local.ts';
+import { purgerCopies } from '../../backend/dernier-etat.ts';
 
 const log = createLogger('compte');
 
@@ -61,6 +62,9 @@ export async function deleteMyAccount(): Promise<void> {
   }
 
   notesStore.clear();
+  // Les copies hors ligne du foyer et des notes (ADR 0016) sont des données
+  // du compte, rangées sur l'appareil : elles partent avec lui.
+  await purgerCopies();
 
   const { error: deconnexion } = await db.auth.signOut({ scope: 'local' });
   // La session locale qui résiste ne remet pas le compte en place : on le
