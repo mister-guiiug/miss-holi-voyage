@@ -7,6 +7,7 @@ import { AppFooter } from '@mister-guiiug/dev-pwa-config/react/app-footer';
 import { useI18n } from '../../i18n/index.ts';
 import { REPO_URL } from '../../app/links.ts';
 import { normalizeInviteCode } from '../../entities/invite-code.ts';
+import { HorsLigneError } from '../../backend/dernier-etat.ts';
 import { useVoyage } from './store.ts';
 import { VoyageAtmosphere } from './VoyageAtmosphere.tsx';
 import { VoyageLink } from './VoyageLink.tsx';
@@ -18,6 +19,7 @@ import { VoyageRule } from './VoyageSheet.tsx';
 export function HomeScreen() {
   const { t } = useI18n();
   const ready = useVoyage(s => s.ready);
+  const unavailable = useVoyage(s => s.unavailable);
   const load = useVoyage(s => s.load);
   const households = useVoyage(s => s.households);
   const trips = useVoyage(s => s.trips);
@@ -61,6 +63,18 @@ export function HomeScreen() {
 
       {!ready ? (
         <SkeletonGroup label={t('voyage.trips')} lines={3} />
+      ) : unavailable && !currentHousehold ? (
+        // PAS « AUCUN FOYER » : il n'a pas été lu, ce qui ne dit pas qu'il
+        // n'existe pas — et le formulaire de création en ferait un second.
+        <EmptyState
+          className="voyage-rise voyage-rise-delay-1"
+          title={t('voyage.unavailable')}
+          description={t('voyage.unavailableHint')}
+        >
+          <Button className="mt-4" onClick={() => void load()}>
+            {t('voyage.retry')}
+          </Button>
+        </EmptyState>
       ) : !currentHousehold ? (
         <div className="voyage-rise voyage-rise-delay-1">
           <EmptyState
@@ -96,7 +110,13 @@ export function HomeScreen() {
                 setBusy(true);
                 setJoinError(null);
                 void acceptInvite(normalizeInviteCode(inviteToken))
-                  .catch(() => setJoinError(t('voyage.inviteInvalid')))
+                  .catch((cause: unknown) =>
+                    setJoinError(
+                      cause instanceof HorsLigneError
+                        ? t('voyage.offline.refused')
+                        : t('voyage.inviteInvalid')
+                    )
+                  )
                   .finally(() => setBusy(false));
                 setInviteToken('');
               }}

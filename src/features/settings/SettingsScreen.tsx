@@ -8,8 +8,9 @@ import { SegmentedControl } from '@mister-guiiug/dev-pwa-config/react/segmented-
 import { ChromePrefs } from '@mister-guiiug/dev-pwa-config/react/chrome-prefs';
 import { dateSlug, downloadText } from '@mister-guiiug/dev-pwa-config/download';
 import { useI18n } from '../../i18n/index.ts';
-import { backend, coverage } from '../../backend/index.ts';
+import { backend, coverage, notesSync } from '../../backend/index.ts';
 import { useNotes } from '../home/store.ts';
+import { SyncState } from '../home/SyncState.tsx';
 import { useVoyage } from '../voyage/store.ts';
 import { configReport } from '../../app/config/env.ts';
 import {
@@ -135,6 +136,18 @@ export function SettingsScreen() {
 
       <Card>
         <CardHeader title={t('settings.data')} />
+        {/* L'ÉTAT DE LA FILE DES NOTES, LÀ OÙ LES NOTES SE MANIENT. L'écran
+            de notes du squelette n'était plus routé depuis le 31/10 : son
+            indicateur ne s'affichait nulle part, alors que la file tourne et
+            peut porter des écritures d'avant, ou des refus. Exporter,
+            importer et tout effacer passent par le réseau en mode distant —
+            c'est ici qu'il faut savoir qu'il manque. En local, `notesSync`
+            est `null` : rien à dire, rien de rendu. */}
+        {notesSync ? (
+          <div className="mb-3">
+            <SyncState sync={notesSync} onResync={() => void load()} />
+          </div>
+        ) : null}
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => void exportNotes()}>
             {t('settings.export')}

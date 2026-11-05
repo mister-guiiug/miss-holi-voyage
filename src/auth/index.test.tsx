@@ -1,8 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { AuthProvider } from '@mister-guiiug/dev-pwa-config/react/auth-provider';
-import { useRole } from './index.ts';
+import type { SupabaseAuthAdapter } from '@mister-guiiug/dev-pwa-config/auth/supabase';
+import { copies } from '../backend/dernier-etat.ts';
+import { avecLaGardeHorsLigne, useRole } from './index.ts';
 
 /**
  * Ce que ce test fige : `useRole()` lit le rôle DANS LE JETON — et rien
@@ -50,5 +52,78 @@ describe('useRole', () => {
     });
     await waitFor(() => expect(muet.result.current.ready).toBe(true));
     expect(muet.result.current.admin).toBe(false);
+  });
+});
+
+/**
+ * La garde hors ligne : un `SIGNED_OUT` émis hors ligne alors que la session
+ * est encore rangée n'est qu'un renouvellement de jeton abandonné. Ce qui est
+ * figé ici : la session regardée est celle de CE projet — la famille partage
+ * une origine — et une vraie déconnexion emporte les copies hors ligne.
+ */
+describe('la garde hors ligne de l’adaptateur', () => {
+  const URL_PROJET = 'https://abcdefghijklmnop.supabase.co';
+  const session = (id: string) =>
+    JSON.stringify({
+      access_token: 'a',
+      refresh_token: 'r',
+      expires_at: 1,
+      user: { id },
+    });
+
+  function garde() {
+    let emettre: (event: string, session: unknown) => void = () => {};
+    const adaptateur = {
+      getSession: async () => null,
+      onAuthStateChange: (cb: typeof emettre) => {
+        emettre = cb;
+        return () => {};
+      },
+    } as unknown as SupabaseAuthAdapter;
+    const recu = vi.fn();
+    avecLaGardeHorsLigne(adaptateur).onAuthStateChange(recu);
+    return { recu, emettre: (event: string) => emettre(event, null) };
+  }
+
+  function horsLigne() {
+    Object.defineProperty(navigator, 'onLine', {
+      configurable: true,
+      get: () => false,
+    });
+  }
+
+  afterEach(() => {
+    delete (navigator as { onLine?: boolean }).onLine;
+    localStorage.clear();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  it('une vraie déconnexion passe, et purge les copies hors ligne', () => {
+    const purge = vi.spyOn(copies, 'clear');
+    const { recu, emettre } = garde();
+    emettre('SIGNED_OUT');
+    expect(recu).toHaveBeenCalledWith('SIGNED_OUT', null);
+    expect(purge).toHaveBeenCalled();
+  });
+
+  it('hors ligne, la session de CE projet encore rangée : ignorée', () => {
+    vi.stubEnv('VITE_SUPABASE_URL', URL_PROJET);
+    localStorage.setItem('sb-abcdefghijklmnop-auth-token', session('u-moi'));
+    const purge = vi.spyOn(copies, 'clear');
+    horsLigne();
+    const { recu, emettre } = garde();
+    emettre('SIGNED_OUT');
+    expect(recu).not.toHaveBeenCalled();
+    expect(purge).not.toHaveBeenCalled();
+  });
+
+  it('hors ligne, seule la session d’une AUTRE app de la famille : la déconnexion passe', () => {
+    vi.stubEnv('VITE_SUPABASE_URL', URL_PROJET);
+    localStorage.setItem('sb-uneautreapp-auth-token', session('u-soeur'));
+    horsLigne();
+    const { recu, emettre } = garde();
+    emettre('SIGNED_OUT');
+    expect(recu).toHaveBeenCalledWith('SIGNED_OUT', null);
   });
 });

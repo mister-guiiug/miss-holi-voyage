@@ -214,4 +214,22 @@ describe('la file d’écritures hors ligne', () => {
     expect(depot.ecrites.map(n => n.id)).toEqual(['note_1']);
     expect(file.getSnapshot()).toMatchObject({ status: 'synced', dead: 0 });
   });
+
+  it('relire la liste montre ce qui attend encore : ajouts posés, retraits ôtés', async () => {
+    // Sans ce calque, une note écrite hors ligne disparaissait de l'écran au
+    // premier rechargement — elle n'est ni sur le serveur ni dans sa copie —
+    // et une note retirée hors ligne réapparaissait.
+    const depot = depotFactice();
+    depot.ecrites.push(note('note_vieille'), note('note_a_retirer'));
+    const file = fileSur(depot.repository, () => false);
+
+    await file.notes.add({
+      ...note('note_neuve'),
+      createdAt: '2026-11-05T00:00:00.000Z',
+    });
+    await file.notes.remove('note_a_retirer');
+
+    const relu = await file.notes.load();
+    expect(relu.notes.map(n => n.id)).toEqual(['note_neuve', 'note_vieille']);
+  });
 });

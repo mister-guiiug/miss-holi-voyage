@@ -1,7 +1,10 @@
 import { createSupabaseClientFactory } from '@mister-guiiug/dev-pwa-config/supabase-client';
 import { createLogger } from '@mister-guiiug/dev-pwa-config/logger';
+import type { IdbStore } from '@mister-guiiug/dev-pwa-config/idb';
 import { notesSchema, type Backend, type Note } from './ports.ts';
 import { parseNotesFile, stringifyNotesFile } from './notes-file.ts';
+import { avecDernierEtat } from './dernier-etat.ts';
+import { identifiantDeSession } from './session.ts';
 
 const log = createLogger('supabase');
 
@@ -44,7 +47,15 @@ export const supabase = createSupabaseClientFactory<SupabaseLike>({
 /** Le strict nécessaire du client, pour ne pas figer une version du SDK. */
 export interface SupabaseLike {
   auth: {
-    getUser(): Promise<{ data: { user: { id: string } | null } }>;
+    /**
+     * La session RANGÉE SUR L'APPAREIL — renouvelée si son jeton est périmé.
+     * `getUser()` n'y figure plus : il interroge le serveur, et répondait
+     * « personne » à chaque coupure (ADR 0016).
+     */
+    getSession(): Promise<{
+      data: { session: { user: { id: string } } | null };
+      error: { message: string } | null;
+    }>;
     /**
      * `scope` EST OBLIGATOIRE ICI, et c'est tout l'intérêt de le déclarer.
      * Une déconnexion « globale » demande au serveur de révoquer les jetons —
@@ -80,6 +91,19 @@ export interface SupabaseLike {
 }
 
 /**
+ * L'utilisateur connecté, LU SUR L'APPAREIL — voir `session.ts`. Le choix
+ * distant/local et le nom des copies en dépendent ; jamais un droit.
+ */
+export async function sessionUserId(): Promise<string | null> {
+  return identifiantDeSession(async () => {
+    const db = await supabase.getClient();
+    const { data, error } = await db.auth.getSession();
+    if (error) throw new Error(error.message);
+    return data.session?.user.id ?? null;
+  });
+}
+
+/**
  * L'adaptateur des notes. Il ne remplace QUE ce port : tout le reste du
  * backend continue de venir du repli local, et c'est ce que
  * `createBackendSelector` compose.
@@ -90,40 +114,52 @@ export interface SupabaseLike {
  * sécurité vient du client — elle vient de la base, et elle doit rester
  * vérifiable sans lire le front.
  */
-export function createSupabaseNotes(): Backend['notes'] {
+export function createSupabaseNotes(
+  options: { idb?: IdbStore } = {}
+): Backend['notes'] {
   const client = () => supabase.getClient();
+
+  const lireDistant = async () => {
+    const db = await client();
+    const { data, error } = await db
+      .from('notes')
+      .select('id, text, created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      // Remonter l'erreur plutôt que rendre une liste vide : une lecture qui
+      // échoue et une liste réellement vide ne se traitent pas pareil.
+      log.error('lecture des notes', { message: error.message });
+      throw new Error(error.message);
+    }
+
+    // Validé comme le local : ce qui vient du réseau n'est pas plus sûr que
+    // ce qui vient du disque.
+    return notesSchema.parse({
+      notes: (data ?? []).map(row => {
+        const r = row as { id: string; text: string; created_at: string };
+        return { id: r.id, text: r.text, createdAt: r.created_at };
+      }),
+    });
+  };
+
+  // HORS LIGNE, LA DERNIÈRE LISTE LUE — jamais `[]`, qui se lirait « tout est
+  // effacé ». Sans copie, l'erreur remonte et l'écran le dit.
+  const lireNotes = avecDernierEtat({
+    port: 'notes',
+    schema: notesSchema,
+    lire: lireDistant,
+    idb: options.idb,
+  });
 
   return {
     async load() {
-      const db = await client();
       // Sans session le rôle PostgREST est `anon` : 0003 lui a retiré tout
       // GRANT sur `notes` (42501). Ne pas interroger la table — et surtout ne
       // PAS « corriger » en accordant SELECT à anon (les tests RLS l’interdisent).
-      const {
-        data: { user },
-      } = await db.auth.getUser();
-      if (!user) return notesSchema.parse({ notes: [] });
-
-      const { data, error } = await db
-        .from('notes')
-        .select('id, text, created_at')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        // Remonter l'erreur plutôt que rendre une liste vide : une lecture qui
-        // échoue et une liste réellement vide ne se traitent pas pareil.
-        log.error('lecture des notes', { message: error.message });
-        throw new Error(error.message);
-      }
-
-      // Validé comme le local : ce qui vient du réseau n'est pas plus sûr que
-      // ce qui vient du disque.
-      return notesSchema.parse({
-        notes: (data ?? []).map(row => {
-          const r = row as { id: string; text: string; created_at: string };
-          return { id: r.id, text: r.text, createdAt: r.created_at };
-        }),
-      });
+      const uid = await sessionUserId();
+      if (!uid) return notesSchema.parse({ notes: [] });
+      return lireNotes(`notes:${uid}`);
     },
 
     /**
@@ -135,15 +171,13 @@ export function createSupabaseNotes(): Backend['notes'] {
      * le bon sens.
      */
     async add(note: Note) {
+      const uid = await sessionUserId();
+      if (!uid) throw new Error('écriture sans session');
       const db = await client();
-      const {
-        data: { user },
-      } = await db.auth.getUser();
-      if (!user) throw new Error('écriture sans session');
       const { error } = await db.from('notes').insert([
         {
           id: note.id,
-          user_id: user.id,
+          user_id: uid,
           text: note.text,
           created_at: note.createdAt,
         },
@@ -161,12 +195,10 @@ export function createSupabaseNotes(): Backend['notes'] {
     },
 
     async clear() {
+      const uid = await sessionUserId();
+      if (!uid) return;
       const db = await client();
-      const {
-        data: { user },
-      } = await db.auth.getUser();
-      if (!user) return;
-      const { error } = await db.from('notes').delete().eq('user_id', user.id);
+      const { error } = await db.from('notes').delete().eq('user_id', uid);
       if (error) throw new Error(error.message);
     },
 
@@ -184,23 +216,21 @@ export function createSupabaseNotes(): Backend['notes'] {
      */
     async import(json: string) {
       const snapshot = parseNotesFile(json);
+      const uid = await sessionUserId();
+      if (!uid) throw new Error('écriture sans session');
       const db = await client();
-      const {
-        data: { user },
-      } = await db.auth.getUser();
-      if (!user) throw new Error('écriture sans session');
 
       const { error: cleared } = await db
         .from('notes')
         .delete()
-        .eq('user_id', user.id);
+        .eq('user_id', uid);
       if (cleared) throw new Error(cleared.message);
 
       if (snapshot.notes.length > 0) {
         const { error } = await db.from('notes').insert(
           snapshot.notes.map(note => ({
             id: note.id,
-            user_id: user.id,
+            user_id: uid,
             text: note.text,
             created_at: note.createdAt,
           }))

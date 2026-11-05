@@ -33,20 +33,6 @@ const fr = {
     about: 'À propos',
   },
   home: {
-    title: 'Notes',
-    loading: 'Chargement des notes',
-    empty: 'Aucune note pour le moment.',
-    emptyHint: 'La première note montrera la persistance versionnée.',
-    add: 'Ajouter',
-    field: 'Nouvelle note',
-    placeholder: 'Ce que je ne veux pas oublier',
-    remove: 'Supprimer',
-    removed: 'Note supprimée',
-    undo: 'Annuler',
-    count: {
-      one: '{count} note',
-      other: '{count} notes',
-    },
     sync: {
       refused: {
         one: '{count} écriture refusée par la base : {error}',
@@ -134,6 +120,17 @@ const fr = {
     noHousehold: 'Aucun foyer',
     noHouseholdHint:
       'Créez un foyer pour y ranger le profil familial et les voyages.',
+    unavailable: 'Foyer indisponible',
+    unavailableHint:
+      'Il n’a pas pu être lu. Rien n’a été créé ni effacé : réessayez une fois le réseau revenu.',
+    retry: 'Réessayer',
+    offline: {
+      copy: 'Hors ligne : votre foyer tel qu’il était {when}, en lecture seule jusqu’au retour du réseau.',
+      refused:
+        'Hors ligne : la modification n’a pas été enregistrée. Votre foyer reste en lecture seule jusqu’au retour du réseau.',
+      noCopy:
+        'Hors ligne, et votre foyer n’a encore jamais été lu sur cet appareil.',
+    },
     householdName: 'Nom du foyer',
     householdMenu: 'Foyer',
     membersTitle: 'Voyageurs',
@@ -339,20 +336,6 @@ const en: typeof fr = {
     about: 'About',
   },
   home: {
-    title: 'Notes',
-    loading: 'Loading notes',
-    empty: 'No notes yet.',
-    emptyHint: 'The first note will show versioned persistence at work.',
-    add: 'Add',
-    field: 'New note',
-    placeholder: "What I don't want to forget",
-    remove: 'Delete',
-    removed: 'Note deleted',
-    undo: 'Undo',
-    count: {
-      one: '{count} note',
-      other: '{count} notes',
-    },
     sync: {
       refused: {
         one: '{count} write refused by the database: {error}',
@@ -438,6 +421,17 @@ const en: typeof fr = {
   voyage: {
     noHousehold: 'No household yet',
     noHouseholdHint: 'Create a household for family profile and trips.',
+    unavailable: 'Household unavailable',
+    unavailableHint:
+      'It could not be read. Nothing was created or erased: try again once the network is back.',
+    retry: 'Retry',
+    offline: {
+      copy: 'Offline: your household as it was {when}, read-only until the network is back.',
+      refused:
+        'Offline: the change was not saved. Your household stays read-only until the network is back.',
+      noCopy:
+        'Offline, and your household has never been read on this device yet.',
+    },
     householdName: 'Household name',
     householdMenu: 'Household',
     membersTitle: 'Travelers',

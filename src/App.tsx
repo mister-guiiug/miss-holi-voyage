@@ -14,6 +14,7 @@ import { JoinScreen } from './features/voyage/JoinScreen.tsx';
 import { PageMotion } from './features/voyage/PageMotion.tsx';
 import { TripWizardScreen } from './features/voyage/TripWizardScreen.tsx';
 import { VoyageLink } from './features/voyage/VoyageLink.tsx';
+import { VoyageEtat } from './features/voyage/VoyageEtat.tsx';
 import { useSolarPhase } from './features/voyage/useSolarPhase.ts';
 import { SettingsScreen } from './features/settings/SettingsScreen.tsx';
 import { AboutScreen } from './features/about/AboutScreen.tsx';
@@ -124,7 +125,13 @@ export function Shell() {
       hrefProp="to"
       navItems={nav}
       navCurrentPath={pathname}
-      beforeMain={<ConnectionBanner />}
+      beforeMain={
+        <>
+          <ConnectionBanner />
+          {/* La copie lue hors ligne, et les gestes refusés — ADR 0016. */}
+          <VoyageEtat />
+        </>
+      }
       afterMain={
         /*
           LE BANDEAU DE CONSENTEMENT, DANS LE FLUX DU CONTENU. Une `region`,

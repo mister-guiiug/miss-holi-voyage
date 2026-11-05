@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '../../i18n/index.ts';
 import { supabase } from '../../backend/supabase.ts';
 import { notesStore } from '../../backend/local.ts';
+import { copies } from '../../backend/dernier-etat.ts';
 import { deleteMyAccount, memeAdresse } from './delete-account.ts';
 import { DangerZone } from './DangerZone.tsx';
 
@@ -50,11 +51,15 @@ describe('deleteMyAccount', () => {
     notesStore.save({
       notes: [{ id: 'note_1', text: 'écrite avant', createdAt: 'hier' }],
     });
+    const purge = vi.spyOn(copies, 'clear');
 
     await deleteMyAccount();
 
     expect(rpc).toHaveBeenCalledWith('delete_my_account');
     expect(notesStore.load().notes).toEqual([]);
+    // Les copies hors ligne du foyer et des notes partent avec le compte.
+    expect(purge).toHaveBeenCalled();
+    purge.mockRestore();
     // `scope: 'local'` : une déconnexion globale demande au serveur de
     // révoquer les jetons d'un compte qui n'existe plus, échoue, et laisse
     // l'application avec une session qui ne mène nulle part.
