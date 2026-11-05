@@ -1,4 +1,5 @@
 import { navigateurHorsLigne } from '@mister-guiiug/dev-pwa-config/auth/stored-session';
+import { supabaseStorageKey } from '@mister-guiiug/dev-pwa-config/supabase-client';
 
 /**
  * QUI EST CONNECTÉ, SANS DEMANDER AU RÉSEAU (ADR 0016).
@@ -28,18 +29,17 @@ import { navigateurHorsLigne } from '@mister-guiiug/dev-pwa-config/auth/stored-s
  * famille sont servies depuis la même origine, donc le même `localStorage` :
  * sur un appareil qui sert aussi à une autre app Supabase du parc, la session
  * lue pourrait être la sienne. Le nom se dérive donc de l'URL du projet,
- * comme le fait le SDK — et `session.test.ts` le confronte au SDK installé,
- * pour qu'une montée qui changerait la formule se voie.
+ * comme le fait le SDK.
+ *
+ * LE CALCUL EST CELUI DU SOCLE depuis la 6.31.0 (`supabaseStorageKey`), promu
+ * d'ici, de miss-lookhouse et de mister-settle ; la fabrique passe ce nom au
+ * client qu'elle crée. `session.test.ts` le confronte toujours au SDK
+ * installé : c'est son défaut que les sessions déjà rangées ont reçu.
  */
 export function caseDeSession(
   url: string | undefined = import.meta.env.VITE_SUPABASE_URL
 ): string | null {
-  if (!url) return null;
-  try {
-    return `sb-${new URL(url).hostname.split('.')[0]}-auth-token`;
-  } catch {
-    return null;
-  }
+  return supabaseStorageKey(url);
 }
 
 /**

@@ -29,9 +29,18 @@ async function apiAuth(): Promise<AuthApi> {
 /**
  * Client paresseux : méthodes async, SAUF l’abonnement — rendu synchrone avec
  * abonnement différé quand le SDK arrive.
+ *
+ * SA CASE DE SESSION AUSSI EST SYNCHRONE (`storageKey`) : hors ligne,
+ * l’adaptateur du socle lit la session sans appeler le SDK, et sans ce nom il
+ * prendrait la première case `sb-*` d’un `localStorage` que toute la famille
+ * partage — peut-être la session d’une autre app. La fabrique la connaît
+ * avant le SDK (socle 6.31.0).
  */
 function sdkALaDemande(): { auth: object } {
   const auth = {
+    get storageKey() {
+      return supabase.storageKey();
+    },
     getSession: async () => (await apiAuth()).getSession(),
     onAuthStateChange: (
       callback: Parameters<AuthApi['onAuthStateChange']>[0]
