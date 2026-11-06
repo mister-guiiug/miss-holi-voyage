@@ -4,7 +4,8 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { AuthProvider } from '@mister-guiiug/dev-pwa-config/react/auth-provider';
 import type { SupabaseAuthAdapter } from '@mister-guiiug/dev-pwa-config/auth/supabase';
 import { copies } from '../backend/dernier-etat.ts';
-import { avecLaGardeHorsLigne, useRole } from './index.ts';
+import { supabaseAuthAdapter } from '@mister-guiiug/dev-pwa-config/auth/supabase';
+import { avecLaPurgeALaDeconnexion, useRole } from './index.ts';
 
 /**
  * Ce que ce test fige : `useRole()` lit le rôle DANS LE JETON — et rien
@@ -60,6 +61,10 @@ describe('useRole', () => {
  * est encore rangée n'est qu'un renouvellement de jeton abandonné. Ce qui est
  * figé ici : la session regardée est celle de CE projet — la famille partage
  * une origine — et une vraie déconnexion emporte les copies hors ligne.
+ *
+ * La garde est celle de l'adaptateur du socle (6.32.0) ; la purge, celle de
+ * l'app. On les éprouve ensemble, sur le vrai adaptateur et un client simulé
+ * qui nomme sa case comme l'enveloppe de l'app.
  */
 describe('la garde hors ligne de l’adaptateur', () => {
   const URL_PROJET = 'https://abcdefghijklmnop.supabase.co';
@@ -73,15 +78,21 @@ describe('la garde hors ligne de l’adaptateur', () => {
 
   function garde() {
     let emettre: (event: string, session: unknown) => void = () => {};
-    const adaptateur = {
-      getSession: async () => null,
-      onAuthStateChange: (cb: typeof emettre) => {
-        emettre = cb;
-        return () => {};
+    const client = {
+      auth: {
+        storageKey: 'sb-abcdefghijklmnop-auth-token',
+        getSession: async () => ({ data: { session: null } }),
+        onAuthStateChange: (cb: typeof emettre) => {
+          emettre = cb;
+          return { data: { subscription: { unsubscribe: () => {} } } };
+        },
       },
-    } as unknown as SupabaseAuthAdapter;
+    };
+    const adaptateur = avecLaPurgeALaDeconnexion(
+      supabaseAuthAdapter({ client }) as SupabaseAuthAdapter
+    );
     const recu = vi.fn();
-    avecLaGardeHorsLigne(adaptateur).onAuthStateChange(recu);
+    adaptateur.onAuthStateChange(recu);
     return { recu, emettre: (event: string) => emettre(event, null) };
   }
 
