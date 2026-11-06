@@ -80,7 +80,7 @@ export default defineConfig(({ command }) => {
         // « Failed to fetch » derrière la CSP — formulaire Compte visible
         // (backend retenu) mais connexion / déconnexion mortes. Motif
         // lookhouse / settle.
-        connectSrc: ["'self'", 'https://*.supabase.co', 'wss://*.supabase.co'],
+        connectSrc: ["'self'"],
       }),
 
       // Repli SPA : sans `404.html`, rafraîchir un lien profond sert la page
