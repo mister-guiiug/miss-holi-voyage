@@ -35,6 +35,7 @@ personne à la rediscuter.
 | [0014](./0014-profil-voyageur-sexe-interets.md) | Sexe + centres d’intérêt (max 4) sur le profil voyageur          |
 | [0015](./0015-themes-voyage.md)                 | Trois thèmes voyage locaux, orthogonaux au clair/sombre          |
 | [0016](./0016-lire-hors-ligne.md)               | Connecté hors ligne : la dernière copie, jamais le magasin local |
+| [0017](./0017-mcp-sur-supabase-compte-robot.md) | Le MCP écrit dans Supabase, sous un compte robot invité          |
 
 ## Quand une application s'écarte
 

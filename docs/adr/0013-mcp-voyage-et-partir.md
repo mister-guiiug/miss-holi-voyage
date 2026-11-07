@@ -34,7 +34,8 @@ non-goals (pas de scraping de billets / inventaires tiers).
 - L’IA distante et la PWA ne partagent pas encore le même magasin par défaut :
   le MCP écrit un fichier ; la PWA reste local-first (IndexedDB). Le pont
   d’import/export ou Supabase est le prochain chantier — volontairement hors
-  de cette ADR pour livrer le contrat d’outils.
+  de cette ADR pour livrer le contrat d’outils. **Fait : ADR 0017** (Supabase,
+  sous un compte robot invité dans le foyer).
 - Le catalogue vieillit : il faut le réviser à la main ; l’outil renvoie
   toujours le hub `ou-partir` en repli.
 - Horizon peut héberger le serveur ; le fichier magasin doit alors être un

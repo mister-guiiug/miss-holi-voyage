@@ -1,0 +1,48 @@
+# La CI du serveur MCP (`mcp/`), sur chaque PR et sur main qui le touchent.
+#
+# Le serveur est en Python, à côté de l'application : la CI de la PWA ne le voit
+# pas. Ses tests ne tournaient jusqu'ici que sur un poste. Horizon le reconstruit
+# depuis ce dossier : ce qui casse ici casserait là-bas, mais en production.
+#
+# Même forme que mister-parc-mcp. Le dernier pas est le contrôle que Horizon
+# recommande lui-même : `fastmcp inspect` charge le point d'entrée comme le fera
+# la plateforme, et liste les outils. Aucun secret : les tests jouent Supabase
+# contre un faux serveur en mémoire.
+name: MCP
+
+on:
+  pull_request:
+    paths: ['mcp/**', '.github/workflows/mcp.yml']
+  push:
+    branches: [main]
+    paths: ['mcp/**', '.github/workflows/mcp.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    name: MCP — lint, tests et inspection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: mcp
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Python 3.14, celui de `mcp/.python-version` : la plus récente que
+      # Horizon construise (3.11 à 3.14).
+      - uses: astral-sh/setup-uv@v10.3.3
+
+      - run: uv sync --locked
+
+      - run: uv run ruff check
+
+      - run: uv run ruff format --check
+
+      - run: uv run pytest
+
+      - run: uv run fastmcp inspect serveur.py:mcp
