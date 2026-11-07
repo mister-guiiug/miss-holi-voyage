@@ -107,7 +107,7 @@ export default defineConfig(({ command }) => {
           name: 'Miss Holi Voyage',
           shortName: 'Miss Holi Voyage',
           description:
-            'Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.',
+            'Préparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d’excursions, décisions partagées.',
         })
       ),
 

@@ -7,7 +7,7 @@
   "engines": {
     "node": ">=24.21.0"
   },
-  "description": "Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.",
+  "description": "Préparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d’excursions, décisions partagées.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && pwa-bundle-budget && pwa-doctor --strict",

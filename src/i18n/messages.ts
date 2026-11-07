@@ -23,7 +23,7 @@ const fr = {
   app: {
     name: 'Miss Holi Voyage',
     tagline:
-      'Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.',
+      'Préparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d’excursions, décisions partagées.',
   },
   nav: {
     home: 'Accueil',
@@ -113,7 +113,7 @@ const fr = {
 
   about: {
     title: 'À propos',
-    what: 'Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.',
+    what: 'Un carnet que tout le foyer partage, étape par étape : la destination, les questions qui comptent, les dates, les vols, une base fixe ou un roadtrip, puis les excursions, sur lesquelles chacun vote. Chaque étape se valide, puis se fige quand la décision est prise.',
   },
 
   voyage: {
@@ -324,9 +324,8 @@ const fr = {
 const en: typeof fr = {
   app: {
     name: 'Miss Holi Voyage',
-    // TODO traduire : create-lg-pwa-app a recopié ici la description française.
     tagline:
-      'Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.',
+      'Plan a family trip: household profile, AI questions, dates and flights, hub or road trip, excursion shortlist, shared decisions.',
   },
   nav: {
     home: 'Home',
@@ -414,8 +413,7 @@ const en: typeof fr = {
 
   about: {
     title: 'About',
-    // TODO traduire : create-lg-pwa-app a recopié ici la description française.
-    what: 'Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.',
+    what: 'A notebook the whole household shares, one step at a time: the destination, the questions that matter, dates, flights, a fixed base or a road trip, then the excursions everyone votes on. Each step is approved, then locked once the decision is made.',
   },
 
   voyage: {
