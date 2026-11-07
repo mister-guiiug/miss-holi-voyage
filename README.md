@@ -1,6 +1,6 @@
 # miss-holi-voyage
 
-Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.
+Préparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d’excursions, décisions partagées.
 
 Application PWA de la famille `miss-*` / `mister-*`, née du squelette
 [`pwa-starter-kit`](https://github.com/mister-guiiug/pwa-starter-kit) et bâtie

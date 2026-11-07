@@ -23,7 +23,7 @@ const fr = {
   app: {
     name: 'Miss Holi Voyage',
     tagline:
-      'Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.',
+      'Préparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d’excursions, décisions partagées.',
   },
   nav: {
     home: 'Accueil',
@@ -113,7 +113,7 @@ const fr = {
 
   about: {
     title: 'À propos',
-    what: 'Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.',
+    what: 'Un carnet que tout le foyer partage, étape par étape : la destination, les questions qui comptent, les dates, les vols, une base fixe ou un roadtrip, puis les excursions, sur lesquelles chacun vote. Chaque étape se valide, puis se fige quand la décision est prise.',
   },
 
   voyage: {
@@ -318,15 +318,28 @@ const fr = {
       maybe: 'Peut-être',
       no: 'Non',
     },
+    ics: {
+      export: 'Ajouter à mon agenda (.ics)',
+      hint: 'Le départ et le retour, avec deux rappels : une semaine avant le départ, puis la veille.',
+      needSave: 'Validez l’étape pour exporter ces dates.',
+      needDate:
+        'Renseignez une date d’aller ou de retour pour l’ajouter à votre agenda.',
+      calName: 'Miss Holi Voyage : {title}',
+      departure: 'Départ : {title}',
+      return: 'Retour : {title}',
+      flight: 'Vol retenu : {label}',
+      alarmWeek: 'Dans une semaine : départ pour {title}',
+      alarmEve: 'Demain : départ pour {title}',
+      fileSuffix: 'agenda',
+    },
   },
 };
 
 const en: typeof fr = {
   app: {
     name: 'Miss Holi Voyage',
-    // TODO traduire : create-lg-pwa-app a recopié ici la description française.
     tagline:
-      'Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.',
+      'Plan a family trip: household profile, AI questions, dates and flights, hub or road trip, excursion shortlist, shared decisions.',
   },
   nav: {
     home: 'Home',
@@ -414,8 +427,7 @@ const en: typeof fr = {
 
   about: {
     title: 'About',
-    // TODO traduire : create-lg-pwa-app a recopié ici la description française.
-    what: 'Preparez un voyage en famille : profil du foyer, questions IA, dates et vols, style hub ou roadtrip, shortlist d excursions - decisions partagees.',
+    what: 'A notebook the whole household shares, one step at a time: the destination, the questions that matter, dates, flights, a fixed base or a road trip, then the excursions everyone votes on. Each step is approved, then locked once the decision is made.',
   },
 
   voyage: {
@@ -614,6 +626,19 @@ const en: typeof fr = {
       interested: 'Yes',
       maybe: 'Maybe',
       no: 'No',
+    },
+    ics: {
+      export: 'Add to my calendar (.ics)',
+      hint: 'Departure and return, with two reminders: a week before departure, then the day before.',
+      needSave: 'Confirm the step to export these dates.',
+      needDate: 'Enter an outbound or return date to add it to your calendar.',
+      calName: 'Miss Holi Voyage: {title}',
+      departure: 'Departure: {title}',
+      return: 'Return: {title}',
+      flight: 'Chosen flight: {label}',
+      alarmWeek: 'In one week: departure for {title}',
+      alarmEve: 'Tomorrow: departure for {title}',
+      fileSuffix: 'calendar',
     },
   },
 };
