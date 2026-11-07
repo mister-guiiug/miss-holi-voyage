@@ -1,6 +1,6 @@
 [project]
 name = "miss-holi-voyage-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "Serveur MCP lecture/écriture pour préparer un voyage Miss Holi Voyage."
 readme = "README.md"
 license = "MIT"
@@ -26,3 +26,6 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+# La typographie française est voulue dans les textes rendus à l’IA : l’apostrophe
+# courbe et le demi-cadratin des intervalles (« 1–12 ») ne sont pas des confusions.
+allowed-confusables = ["’", "–"]

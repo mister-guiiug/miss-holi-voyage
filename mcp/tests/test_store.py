@@ -8,9 +8,7 @@ def test_roundtrip(tmp_path: Path, monkeypatch) -> None:
     path = tmp_path / "voyage.json"
     monkeypatch.setenv("VOYAGE_MCP_STORE", str(path))
     hh = store.create_household("Famille Test")
-    mem = store.upsert_member(
-        hh["id"], display_name="Lou", birth_date="2015-05-01"
-    )
+    mem = store.upsert_member(hh["id"], display_name="Lou", birth_date="2015-05-01")
     assert mem["ageBand"] == "child" or mem["ageBand"] == "teen"
     trip = store.create_trip(hh["id"], "Été")
     updated = store.update_trip(trip["id"], {"destinationCountry": "Grèce"})

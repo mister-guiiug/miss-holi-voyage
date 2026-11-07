@@ -1,7 +1,12 @@
-"""Outils MCP : lire / écrire foyer, voyageurs, voyages, destinations."""
+"""Outils MCP : lire / écrire foyer, voyageurs, voyages, destinations.
+
+Ils écrivent dans `magasin()` — Supabase sous le compte robot si le serveur est
+configuré, le fichier JSON sinon (voir `magasin.py`).
+"""
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Annotated, Any
 
 from fastmcp import FastMCP
@@ -9,7 +14,8 @@ from fastmcp.exceptions import ToolError
 from mcp.types import ToolAnnotations
 from pydantic import Field
 
-from miss_holi_voyage_mcp import destinations, store
+from miss_holi_voyage_mcp import destinations
+from miss_holi_voyage_mcp.magasin import magasin
 from miss_holi_voyage_mcp.ticket_age import (
     excursion_ticket_class,
     flight_ticket_class,
@@ -21,32 +27,27 @@ LECTURE = ToolAnnotations(readOnlyHint=True, idempotentHint=True, openWorldHint=
 ECRITURE = ToolAnnotations(readOnlyHint=False, idempotentHint=False, openWorldHint=False)
 
 
+def _appel(geste: Callable[[Any], Any]) -> Any:
+    """Le geste sur le magasin courant ; ses refus deviennent des erreurs d'outil lisibles.
+
+    `ValueError` : refus métier (foyer inconnu, RLS qui ne trouve rien).
+    `PermissionError` : le compte robot ne se connecte pas.
+    `RuntimeError` : configuration Supabase incomplète.
+    """
+    try:
+        return geste(magasin())
+    except (ValueError, PermissionError, RuntimeError) as exc:
+        raise ToolError(str(exc)) from exc
+
+
 @serveur.tool(
     name="etat",
     title="État du magasin voyage",
     annotations=LECTURE,
 )
 def etat() -> dict[str, Any]:
-    """Résumé du snapshot partagé (foyers, membres, voyages) et chemin du fichier."""
-    snap = store.load()
-    return {
-        "storePath": str(store.store_path()),
-        "households": len(snap["households"]),
-        "members": len(snap["members"]),
-        "trips": len(snap["trips"]),
-        "householdList": [
-            {"id": h["id"], "name": h["name"]} for h in snap["households"]
-        ],
-        "tripList": [
-            {
-                "id": t["id"],
-                "title": t["title"],
-                "householdId": t["householdId"],
-                "destinationCountry": t.get("destinationCountry") or "",
-            }
-            for t in snap["trips"]
-        ],
-    }
+    """Résumé du magasin : où il écrit (Supabase ou fichier), foyers, voyageurs, voyages."""
+    return _appel(lambda m: m.etat())
 
 
 @serveur.tool(
@@ -62,8 +63,7 @@ def lister_membres(
     ] = None,
 ) -> dict[str, Any]:
     """Profils voyageurs avec classes billet avion et excursion à la date donnée."""
-    snap = store.load()
-    members = [m for m in snap["members"] if m["householdId"] == household_id]
+    members = _appel(lambda m: m.membres(household_id))
     rows = []
     for m in members:
         rows.append(
@@ -88,8 +88,8 @@ def lister_membres(
 def creer_foyer(
     name: Annotated[str, Field(description="Nom du foyer", min_length=1, max_length=80)],
 ) -> dict[str, Any]:
-    """Crée un foyer dans le magasin MCP partagé."""
-    return store.create_household(name)
+    """Crée un foyer ; dans Supabase, le compte robot en devient propriétaire."""
+    return _appel(lambda m: m.creer_foyer(name))
 
 
 @serveur.tool(
@@ -127,8 +127,8 @@ def upsert_voyageur(
     ] = None,
 ) -> dict[str, Any]:
     """Profil voyageur : naissance, sexe, centres d’intérêt (détente / culturel / nature…)."""
-    try:
-        return store.upsert_member(
+    return _appel(
+        lambda m: m.upsert_membre(
             household_id,
             member_id=member_id,
             display_name=display_name,
@@ -137,8 +137,7 @@ def upsert_voyageur(
             gender=gender,
             interests=interests,
         )
-    except ValueError as exc:
-        raise ToolError(str(exc)) from exc
+    )
 
 
 @serveur.tool(
@@ -150,10 +149,7 @@ def creer_voyage(
     household_id: Annotated[str, Field(description="Foyer")],
     title: Annotated[str, Field(description="Titre du voyage", min_length=1)],
 ) -> dict[str, Any]:
-    try:
-        return store.create_trip(household_id, title)
-    except ValueError as exc:
-        raise ToolError(str(exc)) from exc
+    return _appel(lambda m: m.creer_voyage(household_id, title))
 
 
 @serveur.tool(
@@ -169,9 +165,7 @@ def maj_voyage(
     date_window_start: Annotated[
         str | None, Field(description="Début de fenêtre YYYY-MM-DD")
     ] = None,
-    date_window_end: Annotated[
-        str | None, Field(description="Fin de fenêtre YYYY-MM-DD")
-    ] = None,
+    date_window_end: Annotated[str | None, Field(description="Fin de fenêtre YYYY-MM-DD")] = None,
     title: Annotated[str | None, Field(description="Nouveau titre")] = None,
 ) -> dict[str, Any]:
     """Met à jour destination, dates ou titre."""
@@ -190,10 +184,7 @@ def maj_voyage(
         patch["title"] = title
     if not patch:
         raise ToolError("aucun champ à mettre à jour")
-    try:
-        return store.update_trip(trip_id, patch)
-    except ValueError as exc:
-        raise ToolError(str(exc)) from exc
+    return _appel(lambda m: m.maj_voyage(trip_id, patch))
 
 
 @serveur.tool(
@@ -202,9 +193,7 @@ def maj_voyage(
     annotations=LECTURE,
 )
 def proposer_destinations(
-    month: Annotated[
-        int | None, Field(description="Mois de départ 1–12", ge=1, le=12)
-    ] = None,
+    month: Annotated[int | None, Field(description="Mois de départ 1–12", ge=1, le=12)] = None,
     tags: Annotated[
         list[str] | None,
         Field(description="Filtres : plage, culture, nature, famille, budget, direct_eu"),
@@ -248,8 +237,8 @@ def appliquer_destination(
     if not dest:
         raise ToolError(f"destination inconnue: {destination_id}")
     notes = f"{dest['summary']}\nSource: {dest['sourceUrl']}"
-    try:
-        return store.update_trip(
+    return _appel(
+        lambda m: m.maj_voyage(
             trip_id,
             {
                 "destinationCountry": dest["country"],
@@ -257,5 +246,23 @@ def appliquer_destination(
                 "destinationNotes": notes,
             },
         )
-    except ValueError as exc:
-        raise ToolError(str(exc)) from exc
+    )
+
+
+@serveur.tool(
+    name="rejoindre_foyer",
+    title="Rejoindre un foyer par son code d’invitation",
+    annotations=ToolAnnotations(readOnlyHint=False, idempotentHint=True, openWorldHint=False),
+)
+def rejoindre_foyer(
+    code: Annotated[
+        str,
+        Field(description="Code d’invitation créé dans la PWA (ex. ABCD-2345), ou le jeton long"),
+    ],
+) -> dict[str, Any]:
+    """Fait entrer le compte robot dans un foyer : le propriétaire crée l’invitation dans la PWA.
+
+    Supabase seulement. Le rôle est celui de l’invitation (éditeur, en général) ; retirer
+    le robot du foyer, dans la PWA, lui coupe l’accès.
+    """
+    return _appel(lambda m: m.rejoindre_foyer(code))

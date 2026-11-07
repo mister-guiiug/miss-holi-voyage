@@ -6,7 +6,7 @@ import json
 import os
 import uuid
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -37,7 +37,7 @@ def store_path() -> Path:
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    return datetime.now(UTC).replace(microsecond=0).isoformat()
 
 
 def load() -> dict[str, Any]:
@@ -78,8 +78,8 @@ def create_household(name: str, notes: str = "") -> dict[str, Any]:
     return hh
 
 
-_GENDERS = frozenset({"female", "male", "other", "unspecified"})
-_INTERESTS = frozenset(
+GENDERS = frozenset({"female", "male", "other", "unspecified"})
+INTERESTS = frozenset(
     {
         "detente",
         "culturel",
@@ -96,7 +96,7 @@ _INTERESTS = frozenset(
         "lent",
     }
 )
-_MAX_INTERESTS = 4
+MAX_INTERESTS = 4
 
 
 def upsert_member(
@@ -117,10 +117,10 @@ def upsert_member(
     if birth_date:
         band = age_band_from_birth(birth_date)
 
-    sex = gender if gender in _GENDERS else None
+    sex = gender if gender in GENDERS else None
     tags: list[str] | None = None
     if interests is not None:
-        tags = [i for i in interests if i in _INTERESTS][:_MAX_INTERESTS]
+        tags = [i for i in interests if i in INTERESTS][:MAX_INTERESTS]
 
     if member_id:
         for i, m in enumerate(snap["members"]):
@@ -151,9 +151,7 @@ def upsert_member(
         "foodNotes": "",
         "sleepNotes": "",
         "interests": tags or [],
-        "position": len(
-            [m for m in snap["members"] if m["householdId"] == household_id]
-        ),
+        "position": len([m for m in snap["members"] if m["householdId"] == household_id]),
     }
     snap["members"].append(row)
     save(snap)
