@@ -318,6 +318,20 @@ const fr = {
       maybe: 'Peut-être',
       no: 'Non',
     },
+    ics: {
+      export: 'Ajouter à mon agenda (.ics)',
+      hint: 'Le départ et le retour, avec deux rappels : une semaine avant le départ, puis la veille.',
+      needSave: 'Validez l’étape pour exporter ces dates.',
+      needDate:
+        'Renseignez une date d’aller ou de retour pour l’ajouter à votre agenda.',
+      calName: 'Miss Holi Voyage : {title}',
+      departure: 'Départ : {title}',
+      return: 'Retour : {title}',
+      flight: 'Vol retenu : {label}',
+      alarmWeek: 'Dans une semaine : départ pour {title}',
+      alarmEve: 'Demain : départ pour {title}',
+      fileSuffix: 'agenda',
+    },
   },
 };
 
@@ -612,6 +626,19 @@ const en: typeof fr = {
       interested: 'Yes',
       maybe: 'Maybe',
       no: 'No',
+    },
+    ics: {
+      export: 'Add to my calendar (.ics)',
+      hint: 'Departure and return, with two reminders: a week before departure, then the day before.',
+      needSave: 'Confirm the step to export these dates.',
+      needDate: 'Enter an outbound or return date to add it to your calendar.',
+      calName: 'Miss Holi Voyage: {title}',
+      departure: 'Departure: {title}',
+      return: 'Return: {title}',
+      flight: 'Chosen flight: {label}',
+      alarmWeek: 'In one week: departure for {title}',
+      alarmEve: 'Tomorrow: departure for {title}',
+      fileSuffix: 'calendar',
     },
   },
 };

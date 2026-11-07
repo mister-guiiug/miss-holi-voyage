@@ -12,6 +12,7 @@ import { DestinationStep } from './DestinationStep.tsx';
 import { StepActions } from './StepActions.tsx';
 import { StepStatusBadge } from './StepStatusBadge.tsx';
 import { VoyageSheet } from './VoyageSheet.tsx';
+import { AgendaExport } from './AgendaExport.tsx';
 
 export function TripWizardScreen() {
   const { tripId = '' } = useParams();
@@ -279,6 +280,16 @@ export function TripWizardScreen() {
             }}
             onLock={() => void setStepStatus(trip.id, 'dates', 'locked')}
             onUnlock={() => void setStepStatus(trip.id, 'dates', 'ready')}
+          />
+          <AgendaExport
+            trip={trip}
+            flight={
+              tripFlights.find(f => f.id === flightChoices[trip.id]) ?? null
+            }
+            dirty={
+              (dateStart || null) !== trip.dateWindowStart ||
+              (dateEnd || null) !== trip.dateWindowEnd
+            }
           />
         </div>
       </VoyageSheet>

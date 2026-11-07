@@ -21,3 +21,9 @@ export const { I18nProvider, useI18n } = createI18n({
   locales: ['fr', 'en'] as const,
   fallbackLocale: 'fr',
 });
+
+/**
+ * Un traducteur : le `t` d'un composant. Les modules sans React (l'export
+ * agenda) le REÇOIVENT, pour parler la langue de l'écran qui les appelle.
+ */
+export type Translate = ReturnType<typeof useI18n>['t'];
