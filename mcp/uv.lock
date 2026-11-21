@@ -639,7 +639,7 @@ requires-dist = [{ name = "fastmcp", specifier = ">=4.1.4" }]
 [package.metadata.requires-dev]
 dev = [
     { name = "jsonschema", specifier = ">=4.26.0" },
-    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest", specifier = ">=9.2.0" },
     { name = "ruff", specifier = ">=0.9" },
 ]
 
