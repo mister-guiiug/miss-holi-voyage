@@ -28,10 +28,10 @@
     "screenshots": "pwa-screenshots --wide-path reglages"
   },
   "bundleBudget": {
-    "_pourquoi": "REPOSÉ le 31/10/2026 après le catalogue Destinations (continents / pays / lieux, auto-complétion enrichie) dans le chunk principal — pas de lazy : pwa-doctor --strict refuse les morceaux différés sans prefetch + BottomNav navigate, et un catalogue offline ne justifie pas ce couple. Relevés locaux du build : main 599 kB brut, préchargé 200,2 kB gzip, total 301,4 kB gzip → +10 % arrondi (formule de pwa-bundle-budget). MESURER EN CI au prochain run et réajuster si l’écart plateforme est réel. Antérieur 20/09 : marge trop serrée sur le squelette ; PostHog reste hors préchargé (loader après consentement).",
+    "_pourquoi": "REPOSÉ le 31/10/2026 après le catalogue Destinations (continents / pays / lieux, auto-complétion enrichie) dans le chunk principal — pas de lazy : pwa-doctor --strict refuse les morceaux différés sans prefetch + BottomNav navigate, et un catalogue offline ne justifie pas ce couple. Relevés locaux du build : main 599 kB brut, préchargé 200,2 kB gzip, total 301,4 kB gzip → +10 % arrondi (formule de pwa-bundle-budget). MESURER EN CI au prochain run et réajuster si l’écart plateforme est réel. Antérieur 20/09 : marge trop serrée sur le squelette ; PostHog reste hors préchargé (loader après consentement). MORCEAU PRINCIPAL RELEVÉ DE 659 À 668 LE 22/11/2026 : le déploiement de main (socle 6.38.0) mesure 661 KiB de morceau principal (non compressé), au-dessus de la borne ; la CI mesure un peu moins, l'écart habituel. 668 = déploiement + ~1 %. Le socle suivant rend environ 0,5 kB gzip (analytics-url.js chargé à la demande, dev-pwa-config#539).",
     "totalGzipKb": 332,
     "preloadGzipKb": 221,
-    "mainChunkKb": 659
+    "mainChunkKb": 668
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
