@@ -13,7 +13,7 @@ dependencies = [
 dev = [
     "jsonschema>=4.26.0",
     "pytest>=9.2.0",
-    "ruff>=0.9",
+    "ruff>=0.17.6",
 ]
 
 [tool.pytest.ini_options]
