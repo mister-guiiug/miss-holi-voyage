@@ -6,6 +6,11 @@ Application PWA de la famille `miss-*` / `mister-*`, née du squelette
 [`pwa-starter-kit`](https://github.com/mister-guiiug/pwa-starter-kit) et bâtie
 sur [`@mister-guiiug/dev-pwa-config`](https://github.com/mister-guiiug/dev-pwa-config).
 
+## Guides
+
+- [Base fixe ou roadtrip en famille](https://mister-guiiug.github.io/miss-holi-voyage/base-fixe-ou-roadtrip-en-famille.html)
+- [Préparer un voyage en famille](https://mister-guiiug.github.io/miss-holi-voyage/preparer-un-voyage-en-famille.html)
+
 ## Démarrer
 
 ```bash
